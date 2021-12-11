@@ -1,0 +1,1 @@
+M562 P0 ; clear heater fault on bed

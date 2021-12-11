@@ -1,0 +1,13 @@
+M116
+if move.axes[2].machinePosition <= 0.4
+	var h = move.axes[2].machinePosition
+else
+	var h = 0.3
+var SF = param.S
+var l = (move.axes[1].min +10) -  (move.axes[1].min +10)
+var d = param.D
+var amount = (h*SF*d*l)/(pi/4)*(d*d)
+G1 X0 Y{"{move.axes[1].max -10 }"} Z{h} F1200 ; move to edge to wipe any oozed filament
+G1 X0 Y{"{move.axes[1].min +10 }"}  F600 E{amount}; move and extrude
+G1 X1
+G1  Y{"{move.axes[1].max -10 }"}  F600 E{amount}; move and extrude

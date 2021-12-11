@@ -1,0 +1,45 @@
+if state.currentTool = -1
+	abort "No tool selected"
+var ThisHeater = tools[state.currentTool].heaters[0]
+if {heat.heaters[var.ThisHeater].state != "active"}
+	abort "Heater " ^ var.ThisHeater ^ " on " ^ tools[state.currentTool].name ^ " not active"
+if  {heat.heaters[var.ThisHeater].active < heat.coldExtrudeTemperature}
+	abort "Heater " ^ var.ThisHeater ^ " on " ^ tools[state.currentTool].name ^ " set below min extrude temp"
+if !exists(param.S)
+	abort "no ""S"" (extrusion factor) parameter sent to macro in M98"
+if !exists(param.D)
+	abort "no ""D"" (nozzle diameter) parameter sent to macro in M98"
+if !exists(param.F)
+	abort "no ""F"" (filament diameter) parameter sent to macro in M98"
+
+M116 ; wait for heaters to settle
+
+var height = 0.2 ; create a variable then set it depending on slicer commanded position prior to calling this macro
+if move.axes[2].machinePosition <= 0.4
+	set var.height = move.axes[2].machinePosition
+else
+	set var.height = 0.3
+
+var SF = 100
+if param.S <=1 ; check if slicer sends percentage of 1 or 100
+	set var.SF = param.S   ; extrusion multiplier as a percentage of 1
+else
+	set var.SF = param.S / 100
+
+var FD = 1.75 ; set filament diameter
+set var.FD = param.F
+
+; set start and end of move	in Y direction - X position will be set manually
+var start = {move.axes[1].max -10 } ; extrude line start position
+var end = {move.axes[1].min +10} ; extrude line end position
+var l = var.start -  var.end ; calculated line length
+var d = param.D ; nozzle diameter that is passed to macro as paramater
+;var amount = (4 * var.height * var.l) / (pi*(var.FD*var.FD)) * var.SF ; calculate how many mm of filament to extrude
+var amount = ((var.d*var.height*var.l) + (pi*((var.height/2)*(var.height/2))*var.l)) / (pi*((var.FD/2)*(var.FD/2))) * var.SF ; calculate how many mm of filament to extrude - Owen's calculation
+echo "flow rate value " ^ var.SF ^ " with " ^ var.d ^ "mm nozzle, " ^  var.FD ^ "mm filament dia over " ^ var.l ^ "mm length = E" ^ var.amount ^ "mm"
+M83 ; set relative extrusion
+G1 X0 Y{var.start} Z{var.height} F1200 ; move to edge to wipe any oozed filament
+G1 X0 Y{var.end}  F600 E{var.amount}; move and extrude
+G1 X{var.d} ; move by one nozle width
+G1  Y{var.start}  F600 E{var.amount}; move and extrude
+G10 ; retract

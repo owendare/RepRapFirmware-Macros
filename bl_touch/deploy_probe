@@ -1,0 +1,2 @@
+M98 P"0:/sys/deployprobe.g"
+;M280 P0 S10 ; deploy BLTouch

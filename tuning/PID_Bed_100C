@@ -1,0 +1,1 @@
+M303 H0 P0.8 S100 ; tune bed using 100% PWM, target temperature 100C (power lowered to stop faults)

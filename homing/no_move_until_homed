@@ -1,0 +1,1 @@
+M564 S1 H1 ; Require homing before move and restrict movement to boundaries
