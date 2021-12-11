@@ -1,4 +1,6 @@
-; Trigger7.g   Used to jog carriqage via attached joystick.
+; Trigger7.g   Used to jog carriage via attached joystick whin general purpose input # 7 is triggered.
+; sensors must be set up in config.g using M581
+
 G4 P10 ; delay 10ms to debounce
 if sensors.gpIn[7].value=0
 	M99 ; break out if sensor value is zero again (bouncing)
