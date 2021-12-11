@@ -1,7 +1,7 @@
 ; 0:/sys/daemon.g
 ; runs continually in background at approximately 10 second intervals
 ; We have initiated an infinite loop at the start so that we can do things at intervals less than 10 seconds
-; daemon.g won't be opened abain if it it still running
+; daemon.g won't be opened again if it it still running
 ; everything must be indented by 2 x tabs becasue of the infinite loop at the start to allow checks at intervals less than 10 seconds
 ; We have created a global variable in config.g called RunDaemon
 ; If RunDaemon is set to "false" we exit the daemon without running anything.  However daemon.g will still try to run every 10 seconds if it exists.
