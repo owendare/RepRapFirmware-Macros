@@ -1,0 +1,1 @@
+M98 P"0:/macros/accelerometer/test_y.g" S"Z"
