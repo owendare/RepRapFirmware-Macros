@@ -1,3 +1,12 @@
+; creates a prime line on the edge of the bed.
+; should be called fro slicer or from start.g
+; requires the following parameters be passed
+; S - Extrusion factor percentage
+; D - nozzle diameter
+; F - Filament diameter
+; example when calling from Prus Slicer start g-code
+; M98 P"0:/macros/print/doPrimeLine" S[extrusion_multiplier] D[nozzle_diameter] F[filament_diameter] ; does prime line with calculated extrusion amount
+
 if state.currentTool = -1
 	abort "No tool selected"
 var ThisHeater = tools[state.currentTool].heaters[0]
