@@ -3,41 +3,45 @@
 echo "cancel.g called"
 set global.Cancelled = true
 
-M291 P"Shutting down heaters" R"Heaters" S0 T1
-G4 S1.1 ; wait for popup
-while #tools > iterations
-	if (tools[iterations]!=null) && (#tools[iterations].heaters >0)
-		M568 P{iterations} S0 R0
-		M568 P{iterations} A0 ; Set active and standby temps to zero & turn off heaters
-		M291 P{"Tool " ^ (iterations) ^ " is set to " ^ heat.heaters[tools[0].heaters[0]].state} S0 T1.5
-		G4 S1.6 ; wait for popup
-
-while iterations < #heat.chamberHeaters
-	if heat.chamberHeaters[iterations]!=-1
-		M141 P{iterations}S0 R0 ;set chamber temp to zero
-		M141 P{iterations} S-275 ; chamber heater off
-		M291 P{"Chamber # " ^ iterations ^ " off"} S0 T1
-
-while iterations < #heat.bedHeaters
-	if heat.bedHeaters[iterations] !=-1
-		M140 P{iterations} S0 R0 ; make bed temp zero
-		M140 P{iterations} S-275 ; bed off
-		M291 P{"Bed # " ^ iterations ^ " off"} S0 T1
-		G4 S1.1 ; wait for popup
-
-M106 P0 S0 ; part fan off
 if heat.heaters[1].current > heat.coldRetractTemperature
 	G10 ; retract the filament a bit before lifting the nozzle to release some of the pressure
-	if move.axes[0].homed && move.axes[1].homed && move.axes[2].homed
-		G91 ; relative positioning
-		G1 Z+1.5 F9000 ; move Z up a bit and retract filament
 else
 	M291 P"Extruder temp too low to retract" R"Retracting" S0 T2
+
+if {!move.axes[0].homed || !move.axes[1].homed || !move.axes[2].homed} ; check if the machine is homed
+	M291 P"Insufficient axis homed.  Cannot raise or park" R"Parking" S0 T3
+else
+	if {(move.axes[2].machinePosition) < (move.axes[2].max - 10)} ; check if there's sufficient space to raise head
+		M291 P{"Raising head to...  Z" ^ (move.axes[2].machinePosition+5)}  R"Raising head" S0 T2
+		G91 ; relative positioning
+		G1 Z5 F120 ; move Z up a bit
+		G90 ;absolute positioning
+	else
+		M291 P{"Cannot raise head - insufficient space  " ^ move.axes[2].machinePosition ^ " : " ^ (move.axes[2].max - 10) ^ "."} R"Raising head" S0 T3
+	G4 S4 ; wait for popup to display
+	G90 ;Absolute positioning
+	M291 P{"Parking head at X:" ^ (move.axes[0].min + 15) ^ " Y:" ^ (move.axes[1].max - 15)} R"Parking" S0 T3
+	G1 X{move.axes[0].min + 15} Y{move.axes[1].max - 15} F1800; parks X head pushes bed out to front so you can pull part
+	M400 ; wait for current moves to finish
+
+; Shut down all tool heaters and set temps to zero.
+M98 P"0:/macros/heating/all_tool_heaters_off.g"
+
+;Shut down all chamber heaters
+M98 P"0:/macros/heating/all_chamber_heaters_off.g"
+
+;Shut down all bed heaters
+M98 P"0:/macros/heating/all_bed_heaters_off.g"
+
+
+M106 P0 S0 ; part fan off
+
 G90 ; absolute positioning
 if move.axes[0].homed && move.axes[1].homed && move.axes[2].homed
 	G1 X{move.axes[0].min} Y{move.axes[1].max} ; parks X head pushes bed out to front so you can pull part
 G4 S1 ; wait for moves to finish
 M84 ; steppers off
-M557 X40:180 Y20:160 S20  ; re-define mesh grid
+M98 P"0:/sys/setDefaultProbePoints.g"
 M291 P"Print cancelled" R"Cancelled" S0 T2
 M98 P"0:/macros/songs/itchyscratchy.g" ; play finish tune
+set global.Cancelled = false

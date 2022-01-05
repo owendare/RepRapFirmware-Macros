@@ -1,6 +1,6 @@
 ; homez.g
 ; called to home the Z axis
-
+M98 P"0:/sys/checkATX.g"
 M566 X200.00 Y200.00 Z10.00 E800.00                          ; set maximum instantaneous speed changes (mm/min)
 M203 X1200.00 Y1200.00 Z600.00 E6000.00                  ; set maximum speeds (mm/min)
 M201 X400.00 Y400.00 Z60.00 E120.00                        ; set accelerations (mm/s^2)

@@ -1,7 +1,7 @@
 ; 0:/sys/daemon.g
 ; runs continually in background at approximately 10 second intervals
 ; We have initiated an infinite loop at the start so that we can do things at intervals less than 10 seconds
-; daemon.g won't be opened again if it it still running
+; daemon.g won't be opened abain if it it still running
 ; everything must be indented by 2 x tabs becasue of the infinite loop at the start to allow checks at intervals less than 10 seconds
 ; We have created a global variable in config.g called RunDaemon
 ; If RunDaemon is set to "false" we exit the daemon without running anything.  However daemon.g will still try to run every 10 seconds if it exists.
@@ -19,9 +19,9 @@ if global.RunDaemon == false
 ; this way allows other checks to run more frequently if needed however the G4 delays inside the loop will affect the frequency of daemon.g
 ; We are only checking the heaters every 10 seconds.  This can be varied by changiing the global variable global.HeaterCheckInterval
 ; if the global variable RunHeaterChecks is false, then we skip this secton but still run the remainder of the daemon
-
+; If ATX power isn't on then no power will go to heaters or fans, so we don't check.
 while true
-	if (global.RunHeaterChecks == true) && (global.RunDaemon==true)
+	if (global.RunHeaterChecks == true) && (global.RunDaemon==true) && (state.atxPower==true)
 		if state.upTime < 60
 			break; If uptime is < 60 seconds, break out so all fans etc have time to stabilise.
 
@@ -120,7 +120,7 @@ while true
 	; This should only trigger if a print is in progress and the runout value has been set by a runout.
 	if state.currentTool != -1
 		if (move.extruders[tools[state.currentTool].filamentExtruder].position > global.filamentDistance)  &&  (global.filamentDistance !=0) && (state.status = "processing")
-			echo "paused called from daemon"	
+			echo "paused called from daemon - filament runout"	
 			M25 ; pause print if filament has run out
 	G4 S2 ; add a delay for these checks
 
