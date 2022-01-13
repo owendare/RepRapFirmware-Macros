@@ -1,37 +1,38 @@
 ;; universal_load.g  All filament load.g files call this one.
+;M929 P"0:/macros/filament/loadeventlog.txt" S3 ; start logging
 echo "entering 0:/macros/filament/universal_load.g" 
+;check if no tool selected or if heater is off
+if state.currentTool=-1
+	echo "No tool selected.  Setting tool 0 active"
+	T0 P0
 ; filament to load is stored in global variable - global.LoadedFilament
-M291 R{"Loading " ^ global.LoadedFilament} P"Loading config and heating" S1 T3
+M80 ; ensure machine is powered up
+G4 S3
+M42 P5 S1 ; make sure the LED lights are on so we can see to load the filament
+;M291 R{"Loading " ^ global.LoadedFilament} P"Loading config and heating" S1 T3
 G4 S3
 echo "attempting to load config for " ^ global.LoadedFilament
 
-M98 P{"0:\filaments\" ^ global.LoadedFilament ^ "\config.g"} ; load config to get extrude temps etc
-
-
-if result==0
-	echo "config loaded"
+M98 P{"0:\filaments\" ^ global.LoadedFilament ^ "\config.g"} ; load config to get cold extrude temps etc
+if result=0
+	echo "config loaded successfully"
 else
 	echo "error loading config"
 
-echo "check tool"
+echo "pre heating"
+M98 P"0:/macros/heating/preheat_current_filament.g" F1 ; preheat to the temps set in filament config.g
+;M568 P{state.currentTool} R{heat.coldRetractTemperature+5} S{heat.coldExtrudeTemperature+10} A2
+if result !=0
+	echo "Error setting temp"
+M291 R{"Loading " ^ global.LoadedFilament} P"Waiting for nozzle loading temperature..." S0 T3
+M116; Wait for temperature
+echo "waiting for temp to stabilize"
+G4 S15 ; wait to stabilise
 
-;check if no tool selected or if heater is off
-if state.currentTool=-1
-	T0 P0
-if heat.heaters[state.currentTool].state="off"
-	T0 P0
-	M568 P{state.currentTool} R0 S0 A0
-
-echo "waiting for temp"
-
-M291 R{"Loading " ^ global.LoadedFilament} P"Waiting for nozzle loading temperature..." S1 T0
-M98 P"0:/macros/heating/preheat_current_filament.g" ; preheat to the temps set in filament config.g
-M116                            ; Wait for temperature
-
-;check if the requested filament is already loaded
-if move.extruders[state.currentTool].filament=global.LoadedFilament
+;check if the requested filament is already loaded and a filament runout hasn't occured
+if (move.extruders[state.currentTool].filament=global.LoadedFilament) && (global.filamentDistance=0)
 	echo "filament already loaded"
-	M291 R"Cancel loading" P"Filament already loaded.  Skipping load moves" S3
+	M291 R"Cancel loading" P"Filament already loaded.  Skipping load moves" S0 T3
 	G4 S3
 	M99;
 
@@ -41,8 +42,9 @@ if job.file.fileName!=null && state.status!="paused"
 	echo "Print job is running - confirmation required"
 	M291 R"Confirm?" P"A print job is in progress.  Press OK to continue or CANCEL to abort" S3
 
+
 ;we know the requested filament isn't loaded, but if something else is, we need to unload it first
-if move.extruders[state.currentTool].filament!=""
+if {move.extruders[state.currentTool].filament!=""} && {global.filamentDistance=0}
 	echo "unload required"
 	if move.extruders[state.currentTool].filament!=global.LoadedFilament
 		M702 S{"{move.extruders[state.currentTool].filament}"}
@@ -51,13 +53,21 @@ if move.extruders[state.currentTool].filament!=""
 		M701 S{global.LoadedFilament}
 
 ; we check filament loaded again in case this is a second loop from an unload.
-if move.extruders[state.currentTool].filament!=global.LoadedFilament
+; also we check if the filament is loaded, but we're in the middle of a runout situation & reload
+if state.currentTool=-1
+	echo "No tool selected.  Setting tool 0 active"
+	T0 P0
+if {move.extruders[state.currentTool].filament!=global.LoadedFilament}
 	echo "loading filament"
 	M291 R{"Loading " ^ global.LoadedFilament} P"Feeding and priming..." S0 T3
+	G4 S4
 	M98 P"0:/macros/filament/do_moves_for_load.g"
 	echo "loading complete"
-G92 E0 ; set extruder position to zero
-M291 R{"Loading " ^ global.LoadedFilament} P"Filament loaded....." S1 T5
+
+M291 R{"Loading " ^ global.LoadedFilament} P"Filament loaded....." S0 T3
+G4 S3
 M98 P"0:/macros/songs/simpsons.g"
+set global.filamentDistance = 0 ; reset filament sensor extrusion distance after tripping
 echo "exiting universal_load.g"
 G4 S3
+;M929 S0 ; stop logging
