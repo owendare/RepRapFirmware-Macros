@@ -122,6 +122,10 @@ while true
 		if (move.extruders[tools[state.currentTool].filamentExtruder].position > global.filamentDistance)  &&  (global.filamentDistance !=0) && (state.status = "processing")
 			echo "paused called from daemon - filament runout"	
 			M25 ; pause print if filament has run out
+		; Check if a deferred power down is in progress.
+	if state.deferredPowerDown=1
+		M291 S0 R"Powering down" P"A deferred power down is in progress.  Send M80 to cancel" T3
+		G4 S10
 	G4 S2 ; add a delay for these checks
 
 
