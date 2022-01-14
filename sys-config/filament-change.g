@@ -1,5 +1,6 @@
 ; 0:/sys/filament-change.g
 ; runs when M600 is called in preference to pause.g
+M98 P"0:/sys/checkATX.g"
 M83            ; relative extruder moves
 G91		; relative movement
 G10  ; retract filament

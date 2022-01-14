@@ -7,8 +7,8 @@ set global.Cancelled = true
 if {state.currentTool!=-1} ; check if any tools are active
 	if #tools[state.currentTool].heaters > 0 & heat.heaters[tools[state.currentTool].heaters[0]].current > heat.coldRetractTemperature
 		G91 ; relative positioning
-		G1 E-4 F1800 ; retract the filament a bit before lifting the nozzle to release some of the pressure
-		M291 P"Retracted 4mm" R"Retracting" S0 T3
+		G1 E-1 F1800 ; retract the filament a bit before lifting the nozzle to release some of the pressure
+		M291 P"Retracted 1mm" R"Retracting" S0 T3
 		G4 S4 ; wait for popup
 		G90 ; back to absolute positioning
 	else
