@@ -1,6 +1,17 @@
 ;; universal_load.g  All filament load.g files call this one.
 ;M929 P"0:/macros/filament/loadeventlog.txt" S3 ; start logging
 echo "entering 0:/macros/filament/universal_load.g" 
+
+;check if homed and move to a good height and centre of bed
+while iterations < #move.axes
+	if !move.axes[iterations].homed
+		G28
+M400		
+; check if we are at the defined best load/unload position
+if (move.axes[0].userPosition!=global.Bed_Center_X) || (move.axes[1].userPosition!=global.Bed_Center_Y) || (move.axes[2].userPosition!=75)
+	M291 R"Positioning" P"Moving to safe extrude height" S2 T2
+	G1 X{global.Bed_Center_X} Y{global.Bed_Center_Y} Z75 F3600
+M400
 ;check if no tool selected or if heater is off
 if state.currentTool=-1
 	echo "No tool selected.  Setting tool 0 active"
@@ -31,11 +42,8 @@ G4 S15 ; wait to stabilise
 
 ;check if the requested filament is already loaded and a filament runout hasn't occured
 if (move.extruders[state.currentTool].filament=global.LoadedFilament) && (global.filamentDistance=0)
-	echo "filament already loaded"
-	M291 R"Cancel loading" P"Filament already loaded.  Skipping load moves" S0 T3
-	G4 S3
-	M99;
-
+	echo "filament shows as already loaded.  confirm loading required?"
+	M291 R"Continue loading?" P{global.LoadedFilament ^ " filament already loaded.  OK to do load moves"} S3
 
 ; opt out option as print in running
 if job.file.fileName!=null && state.status!="paused"
@@ -69,5 +77,5 @@ G4 S3
 M98 P"0:/macros/songs/simpsons.g"
 set global.filamentDistance = 0 ; reset filament sensor extrusion distance after tripping
 echo "exiting universal_load.g"
-G4 S3
+M568 P{state.currentTool} A0 ; turn off heater again
 ;M929 S0 ; stop logging
