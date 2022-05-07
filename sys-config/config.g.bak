@@ -45,13 +45,12 @@ M83                                                         ; ...but relative ex
 M550 P"3Dprinter"                                       	; set printer name
 
 ; Network
-M586 P0 S1                                                  ; enable HTTP
-M586 P1 S1                                                  ; enable FTP
-M586 P2 S1                                                  ; enable Telnet
 M554 P192.168.1.1											; set gateway
 M553 P255.255.255.0											; set netmask
 M552 S1 P"DARE"                                             ; enable network
-
+M586 P0 S1                                                  ; enable HTTP
+M586 P1 S1                                                  ; enable FTP
+M586 P2 S1                                                  ; enable Telnet
 
 ; Drives
 M569 P0 S1                                                  ; physical drive 0 (X) goes forwards

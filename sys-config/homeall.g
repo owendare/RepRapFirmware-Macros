@@ -40,6 +40,13 @@ if sensors.endstops[2].triggered
 	M280 P0 S160 ; reset BL Touch
 	G4 S0.5
 
+; heat nozzle so that any oozed plastic will not affect homing
+;if state.currentTool=-1
+;	T0 P0
+;M568 P{state.currentTool} R{heat.coldRetractTemperature + 10} S{heat.coldExtrudeTemperature + 10} A2
+;M291 R"Heating nozzle" P"Heating nozzle to " ^ {heat.coldExtrudeTemperature + 10} S0 T3
+;M116
+
 G1 H1 X-205 Y-205 F1800 ; move quickly to X and Y axis endstops and stop there (first pass)
 if result != 0
 	abort "Print cancelled due error during fast homing"
@@ -61,10 +68,3 @@ M913 X100 Y100 Z100 ; set X Y Z motors to 100% of their normal current
 
 ;reset speeds
 M98 P"0:/sys/set_max_speeds.g"
-
-; Uncomment the following lines to lift Z after probing
-;G91                    ; relative positioning
-;G1 S2 Z5 F100          ; lift Z relative to current position
-;G90                    ; absolute positioning
-
-

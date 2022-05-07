@@ -35,6 +35,14 @@ if sensors.endstops[2].triggered
 	M280 P0 S160 ; reset BL Touch
 	G4 S0.5
 
+;check state of heaters
+var bedState = heat.heaters[0].state
+var bedActiveTemp = heat.heaters[0].active
+var bedStandbyTemp = heat.heaters[0].standby
+var nozzleState = heat.heaters[1].state
+M140 P0 S-276 ; turn off bed heater
+M568 P0 A0 ; turn off nozzle heater
+
 ; If the printer hasn't been homed, home it
 if !move.axes[0].homed || !move.axes[1].homed || !move.axes[2].homed
 	G28
@@ -66,3 +74,15 @@ while true
 G28; Home all again just to be sure
 ;G29 S1 ; Reload bed compensation mesh
 
+; turn the heaters back on if needed
+if var.bedState != "off"
+	M140 S{var.bedActiveTemp} R{var.bedStandbyTemp}
+	if var.bedState="active"
+		M144 P0 S1 ; put bed on active temp
+	else
+		M144 P0 S0 ; put bed on standby temp
+if var.nozzleState	!= "off"
+	if var.nozzleState = "active"
+		M568 P0 A2 ; set nozzle to active
+	else
+		M568 P0 A1 ; set nozzle to standby

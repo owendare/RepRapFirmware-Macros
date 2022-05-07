@@ -31,6 +31,12 @@ if sensors.endstops[2].triggered
 
 G90                     ; absolute positioning
 
+; heat nozzle so that any oozed plastic will not affect homing
+;if state.currentTool=-1
+;	T0 P0
+;M568 P{state.currentTool} R{heat.coldRetractTemperature + 10} S{heat.coldExtrudeTemperature + 10} A2
+;M291 R"Heating nozzle" P"Heating nozzle to " ^ {heat.coldExtrudeTemperature + 10} S0 T3
+;M116
 
 ; variabes set in Config.g
 G1 X{global.Bed_Center_X - sensors.probes[0].offsets[0] } Y{global.Bed_Center_Y - sensors.probes[0].offsets[1]} F12000

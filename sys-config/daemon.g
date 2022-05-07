@@ -40,9 +40,11 @@ while true
 					continue ; don't check this heater as it is PID auto tuning
 				if (heat.heaters[iterations].current) > (heat.heaters[iterations].max) ; temp is over max so emergency shutdown required
 					;M41 P5 S1  ; activate output connected to externally powered latching relay here to sound alarm
-					M118 P0 S"heater over max temp fault detected in daemon.g.  - shutting down" L1
-					M112; emergency shutdown
-					M81 S1 ; turn off power when fans have turned off
+					G4 S2 ; Delay to see if it's a spike on the thermistor
+					if (heat.heaters[iterations].current) > (heat.heaters[iterations].max)
+						M118 P0 S"heater over max temp fault detected in daemon.g.  - shutting down" L1
+						M112; emergency shutdown
+						M81 S1 ; turn off power when fans have turned off
 				if (heat.heaters[iterations].current > 45)  &&  (heat.heaters[iterations].active > 45); no real danger at below this temp as ambient may be close to this
 					;echo "heater " ^ iterations ^ " is above 45 degrees"
 					if (heat.heaters[iterations].state!="off") && (heat.heaters[iterations].current > heat.heaters[iterations].active + 15) ; temp is > 15 degrees above target.
@@ -50,7 +52,7 @@ while true
 						set global.LastTemp=heat.heaters[iterations].current ; set the last check temp
 						echo "heater " ^ iterations ^ " temp: " ^ heat.heaters[iterations].current
 						G4 S3 ; wait 3 seconds
-						if (heat.heaters[iterations].current > global.LastTemp + 0.5) ; heat is rising by more than 0.5 degrees in 3 seconds
+						if (heat.heaters[iterations].current > global.LastTemp + 1) ; heat is rising by more than 1 degrees in 3 seconds
 							echo "heater runaway fault detected in daemon.g.  - shutting down"
 							if (state.status=="processing")
 								M25 ; pause print so you might be able to save it using M119
@@ -62,8 +64,8 @@ while true
 					elif (heat.heaters[iterations].state="off") && ((heat.heaters[iterations].current) >= (fans[1].thermostatic.lowTemperature+0)) ; if heater is off and temp is greater than 50 there could be an issue
 						set global.LastTemp=heat.heaters[iterations].current;
 						;echo "heater " ^ iterations ^ " is off but checking if temp is rising"
-						G4 S3 ; wait 3 seconds
-						if (heat.heaters[iterations].current > global.LastTemp + 0.5) ; heat is rising by more than 0.5 degrees in 3 seconds
+						G4 S6 ; wait 5 seconds
+						if (heat.heaters[iterations].current > global.LastTemp + 2) ; heat is rising by more than 2 degrees in 6 seconds
 							echo "heater is off but temp is rising on heater " ^ iterations ^ "emergency shutdown"
 							;M41 P5 S1  ; activate output connected to externally powered latching relay here to sound alarm
 							echo "heater runaway fault detected in daemon.g.  - shutting down"
@@ -118,12 +120,12 @@ while true
 	;G4 P500
 	;echo "fast checks outside every 2 seconds"
 	; This should only trigger if a print is in progress and the runout value has been set by a runout.
-	if state.currentTool != -1
+	if (state.currentTool != -1) && (state.currentTool < #tools)
 		if (move.extruders[tools[state.currentTool].filamentExtruder].position > global.filamentDistance)  &&  (global.filamentDistance !=0) && (state.status = "processing")
 			echo "paused called from daemon - filament runout"	
 			M25 ; pause print if filament has run out
 		; Check if a deferred power down is in progress.
-	if (state.deferredPowerDown=1) && (state.atxPower==true)
+	if (state.deferredPowerDown==true) && (state.atxPower==true)
 		M291 S0 R"Powering down" P"A deferred power down is in progress.  Send M80 to cancel" T3
 		G4 S10
 	G4 S2 ; add a delay for these checks

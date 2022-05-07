@@ -43,5 +43,7 @@ G4 S1 ; wait for moves to finish
 M84 ; steppers off
 M98 P"0:/sys/setDefaultProbePoints.g"
 M291 P"Print cancelled" R"Cancelled" S0 T2
+set global.RunDaemon = false ; the daemon interferes with the music
 M98 P"0:/macros/songs/itchyscratchy.g" ; play finish tune
+set global.RunDaemon = true 
 set global.Cancelled = false

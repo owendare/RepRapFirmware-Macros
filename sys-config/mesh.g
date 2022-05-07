@@ -84,9 +84,37 @@ if (var.ProbeNumX * var.ProbeNumY) > 441
 	
 echo "Probing " ^ var.ProbeNumX ^ " points in X direction & " ^ var.ProbeNumY ^ " points in Y direction"
 
+;check state of heaters
+var bedState = heat.heaters[0].state
+var bedActiveTemp = heat.heaters[0].active
+var bedStandbyTemp = heat.heaters[0].standby
+var nozzleState = heat.heaters[1].state
+M140 P0 S-276 ; turn off bed heater
+M568 P0 A0 ; turn off nozzle heater
+
+; do probing
 M557 X{var.m557MinX,var.m557MaxX} Y{var.m557MinY,var.m557MaxY} P{var.ProbeNumX,var.ProbeNumY}
-;echo "M557 X" ^ {var.m557MinX} ^ ":" ^ {var.m557MaxX} ^ " Y" ^ {var.m557MinY} ^ ":" ^ {var.m557MaxY} ^  " P" ^ {var.ProbeNumX} ^ ":" ^ {var.ProbeNumY}
 if result != 0
 	abort "ERROR: could not create mesh" 
-;M557
-G29 S0
+else
+	G29 S0
+	if result != 0
+		abort "ERROR: Mesh probing failed"
+	else
+		echo "Mesh probing successful.   Loading mesh.."
+
+G1 X{global.Bed_Center_X} Y{global.Bed_Center_Y} Z{sensors.probes[0].diveHeight+2} F3600
+G30
+
+; turn the heaters back on if needed
+if var.bedState != "off"
+	M140 S{var.bedActiveTemp} R{var.bedStandbyTemp}
+	if var.bedState="active"
+		M144 P0 S1 ; put bed on active temp
+	else
+		M144 P0 S0 ; put bed on standby temp
+if var.nozzleState	!= "off"
+	if var.nozzleState = "active"
+		M568 P0 A2 ; set nozzle to active
+	else
+		M568 P0 A1 ; set nozzle to standby
