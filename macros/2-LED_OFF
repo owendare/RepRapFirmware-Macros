@@ -1,0 +1,2 @@
+; turn off LED strip driven by P5 output
+M42 P5 S0

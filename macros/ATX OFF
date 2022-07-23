@@ -1,0 +1,7 @@
+if (state.status="processing")
+	echo "Printer must be idle before turning off ATX"
+	M99
+if (state.atxPower=false)
+	M99 ; nothing to do here
+M81
+echo "ATX power off"

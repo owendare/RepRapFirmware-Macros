@@ -1,0 +1,15 @@
+if (state.status="processing")
+	echo "Printer must be idle before turning off ATX"
+	M99
+if (state.atxPower=false)
+	M99 ; nothing to do here
+M400 ; wait for moves to finish
+M18 ; disable all steppers
+M98 P"0:/macros/heating/all_heaters_off.g"
+M81 S1
+var ShutDownTemp = fans[1].thermostatic.lowTemperature-1.5
+while ((heat.heaters[1].current) > (var.ShutDownTemp))
+	M291 R"Shutting down" P{"Shutting down @ " ^ var.ShutDownTemp ^ " deg.  Current = " ^ heat.heaters[1].current ^ " deg.  Send M80 to cancel"} S1 T3
+	G4 S6
+if (state.atxPower=false)
+	echo "ATX power off"
