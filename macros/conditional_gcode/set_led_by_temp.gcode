@@ -2,6 +2,17 @@
 
 ; This macro sets neopixels based on tool heater temp
 ; It should be called from daemon.g to achieve continual updates
+; or by another macro with a loop if you only want to change colours during heatup
+
+;example macro called from your slicer start code before after temps, but before M116
+; #####
+;while heat.heaters[1].current < 120
+;    M98 P"set_led_by_temp.gcode"
+;    G4 S3
+; done heating, so set to white
+;M150 R255 U255 B255 W255 P255 F0 ; set pixels
+; #######
+
 ; LED strip pixel count must equal number of tools * pixels per tool 
 ; For multiple tools the neopixels must be daisy chained or a continuos strip
 ; The colour will gradually scale from one to the next.
@@ -11,7 +22,7 @@
 
 var RGBW = false  ; set to true if LED is RGBW type, oherwise set to false
 
-var logging = true ; set to true if you want echos to appear in console to help see what the values are.  Otherwise set false
+var logging = false ; set to true if you want echos to appear in console to help see what the values are.  Otherwise set false
 
 ; adjust these variable temps to suit requirements.
 var lowTemp = 30
@@ -255,4 +266,3 @@ while iterations < #tools ; loop through the tools
 		M150 R{var.redValue} U{var.greenValue} B{var.blueValue} W{var.whiteValue} P{var.setBrightness} S{var.pixelsPerTool} F{var.F} ; set pixels
 	else
 		M150 R{var.redValue} U{var.greenValue} B{var.blueValue} P{var.setBrightness} S{var.pixelsPerTool} F{var.F} ; set pixels
-	
