@@ -35,8 +35,11 @@ if !exists(global.filamentRetractSpeed)
 else
 	set global.filamentRetractSpeed = 300
 
-
-
+if !exists(global.InMacro) ; macro used to check if we're already in a macro to avoid running triggers multile times
+	global InMacro = false
+else
+	set global.InMacro = false
+	
 ; serial comms / Paneldue
 M575 P1 B57600 S1
 ; General preferences
@@ -58,16 +61,19 @@ M569 P0 S1                                                  ; physical drive 0 (
 M569 P1 S0                                                  ; physical drive 1 (Y) goes backwards
 M569 P2 S1                                                  ; physical drive 2 (Z) goes forwards
 M569 P3 S0                                                  ; physical drive 3 (E0) goes backwards
-M584 X0 Y1 Z2:4 E3											; two Z motors connected to driver outputs Z and E1
-M671 X-74:240 Y79:79 S5.5 									; leadscrews at left (connected to Z) and right (connected to E1) of X axis
+;M584 X0 Y1 Z2:4 E3											; assign drives with two Z motors connected to driver outputs Z and E1
+M584 X4 Y1 Z2 E3											; assign single Z temp test
+;M671 X-74:240 Y79:79 S5.5 									; leadscrews at left (connected to Z) and right (connected to E1) of X axis
 M350 X16 Y16 Z16 I1                           				; Configure microstepping with interpolation for XYZ
 M350 E16 I1													; Configure microstepping with interpolation for E0
-M92 X100.00 Y100.00 Z400.00                            		; set steps per mm XYZ
-M92 E854										; set E steps/mm for Titan Aero
+;M92 X100.00 Y100.00 Z400.00                            	; set steps per mm XYZ
+M92 X80.00 Y100.00 Z400.00                            		; set steps per mm XYZ using 20 tooth pulley on X
+M92 E854													; set E steps/mm for Titan Aero
+M915 H240 X Y S3 R2 												; set stall detection for X & Y axis. driver-stall.g will be run.
 
 ; axis settings
-M98 P"0:/sys/set_max_speeds.g" ; set all the max speeds in macro as these are adjusted during home moves so we only want to adjust in one spot
-M906 X1100 Y1100 Z1100 E1200 I30                             ; set motor currents (mA) and motor idle factor in per cent
+M98 P"0:/sys/set_max_speeds.g" 								; set all the max speeds in macro as these are adjusted during home moves so we only want to adjust in one spot
+M906 X1680 Y1100 Z1100 E1200 I30                             ; set motor currents (mA) and motor idle factor in per cent
 M84 S600                                                     ; Set idle timeout at 10 minute
 
 ; Axis Limits
@@ -135,6 +141,7 @@ M106 P2 C"Radiator Fan" H5 L0 X1 B1.2  T33:38    	; set fan 4 value, turn on at 
 
 ; MCU temp sensor
 M308 S2 P"mcu-temp" Y"mcu-temp" A"Duet Board" 					; Configure MCU sensor
+M308 S6 Y"drivers" A"Duet stepper drivers"           ; defines sensor 6 as stepper driver temperature sensor
 ; Calibrate MCU temp
 M912 P0 S-4	
 
@@ -269,3 +276,4 @@ if (heat.heaters[1].current > fans[1].thermostatic.lowTemperature) && (state.atx
 	G4 S5
 
 M501 ; load config-overide.g
+
