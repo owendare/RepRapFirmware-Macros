@@ -22,7 +22,7 @@
 
 var RGBW = false  ; set to true if LED is RGBW type, oherwise set to false
 
-var logging = false ; set to true if you want echos to appear in console to help see what the values are.  Otherwise set false
+var logging = true ; set to true if you want echos to appear in console to help see what the values are.  Otherwise set false
 
 ; adjust these variable temps to suit requirements.
 var lowTemp = 30
@@ -42,14 +42,14 @@ var pixelsPerTool = 5
 
 ; Common RGB colours (R,G,B)
 ; RED -		255,0,0
-; YELLOW - 	255,255,0
-; ORANGE - 	255,165,0
-; BLUE - 	0,0,255
-; LIME - 	0,255,0
-; GREEN - 	0,128,0
-; MAGENTA -	255,0,255
-; WHITE - 	255,255,255
-; OFF - 	0,0,0
+; YELLOW -	255,255,0
+; ORANGE -	255,165,0
+; BLUE -	0,0,255
+; LIME -	0,255,0
+; GREEN -	0,128,0
+; MAGENTA - 255,0,255
+; WHITE -	255,255,255
+; OFF -		0,0,0
 
 
 ;adjust values following to achieve desired colors for each range
@@ -213,11 +213,11 @@ while iterations < #tools ; loop through the tools
 		set var.lowValue = min(var.midGreen,var.lowGreen)
 		set var.highValue = max(var.midGreen,var.lowGreen)		
 		set var.greenScale = (var.highValue - var.lowValue) / (var.medTemp - var.lowTemp)
-
+		
 		set var.lowValue = min(var.midBlue,var.lowBlue)
 		set var.highValue = max(var.midBlue,var.lowBlue)		
 		set var.blueScale = (var.highValue - var.lowValue) / (var.medTemp - var.lowTemp)
-
+		
 		set var.lowValue = min(var.midWhite,var.lowWhite)
 		set var.highValue = max(var.midWhite,var.lowWhite)		
 		set var.whiteScale = (var.highValue - var.lowValue) / (var.medTemp - var.lowTemp)
