@@ -1,0 +1,13 @@
+Begin test @ 2023-01-09T19:58:24
+Probe test 1 Z = 1.597 deviation 0.000
+Probe test 2 Z = 1.592 deviation 0.000
+Probe test 3 Z = 1.595 deviation 0.000
+Probe test 4 Z = 1.592 deviation 0.000
+Probe test 5 Z = 1.595 deviation 0.000
+Probe test 6 Z = 1.597 deviation 0.000
+Probe test 7 Z = 1.595 deviation 0.000
+Probe test 8 Z = 1.597 deviation 0.000
+Probe test 9 Z = 1.597 deviation 0.000
+Probe test 10 Z = 1.597 mean 0.000
+Deviation = 0.000
+Mean deviation = 0.000
