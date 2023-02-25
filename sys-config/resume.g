@@ -11,7 +11,7 @@ T R1 ; Select last tool used
 M144 S1 ; restore bed to active temp
 M106 P0 R1 ; restore part cooling fan speed to what it was at pause
 M116 ; Wait for temps
-G1 R1 X0 Y0 Z5 F6000 ; go to 5mm above position of the last print move
+G1 R1 X0 Y0 Z5 F3600 ; go to 5mm above position of the last print move
 G1 R1 X0 Y0          ; go back to the last print move
 M83                  ; relative extruder moves
 G11 		     ; unretract

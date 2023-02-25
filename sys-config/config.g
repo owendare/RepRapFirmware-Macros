@@ -69,11 +69,11 @@ M350 E16 I1													; Configure microstepping with interpolation for E0
 ;M92 X100.00 Y100.00 Z400.00                            	; set steps per mm XYZ
 M92 X80.00 Y100.00 Z400.00                            		; set steps per mm XYZ using 20 tooth pulley on X
 M92 E854													; set E steps/mm for Titan Aero
-M915 H240 X Y S3 R2 												; set stall detection for X & Y axis. driver-stall.g will be run.
+M915 H240 X Y S6 R2												; set stall detection for X & Y axis. driver-stall.g will be run.
 
 ; axis settings
 M98 P"0:/sys/set_max_speeds.g" 								; set all the max speeds in macro as these are adjusted during home moves so we only want to adjust in one spot
-M906 X1680 Y1100 Z1100 E1200 I30                             ; set motor currents (mA) and motor idle factor in per cent
+M906 X1400 Y1100 Z1100 E1200 I30                             ; set motor currents (mA) and motor idle factor in per cent
 M84 S600                                                     ; Set idle timeout at 10 minute
 
 ; Axis Limits
@@ -97,31 +97,36 @@ if !exists(global.Bed_Center_Y)
 	global Bed_Center_Y = floor(move.axes[1].max  / 2)
 
 ; Heaters
-M308 S0 P"bedtemp" Y"thermistor" A"Bed"  B3950 C7.06e-8         		; configure sensor 0 as thermistor on pin bedtemp
+;M308 S0 P"bedtemp" Y"thermistor" A"Bed"  B3950 C7.06e-8         		; configure sensor 0 as thermistor on pin bedtemp
+M308 S0 P"bedtemp" Y"thermistor" A"Bed"  T100000 B4725 C7.060000e-8         		; configure sensor 0 as thermistor on pin bedtemp
 M950 H0 C"bedheat" T0 Q10                                       ; create bed heater output on bedheat and map it to sensor 0 and set PWM frequency to 10hz
 M140 H0 																		; Set bed themp to zero
 M143 H0 S130 A0 C0                                          ; set temperature limit for heater 0 to 130C - fault if too high
-M308 S1 P"e0temp" A"Nozzle-1" Y"thermistor" T100000 B3950 C0 ; configure sensor 1 as thermistor on pin e0temp - Aurarum cartrdge thermistor
+;M308 S1 P"e0temp" A"Nozzle-1" Y"thermistor" T100000 B3950 C0 ; configure sensor 1 as thermistor on pin e0temp - Aurarum cartrdge thermistor
+M308 S1 P"e0temp" A"Nozzle-1" Y"thermistor" T100000 B4725 C7.060000e-8 ; configure sensor 1 as thermistor on pin e0temp - Aurarum cartrdge thermistor
 M950 H1 C"e0heat" T1                                        ; create nozzle heater output on e0heat and map it to sensor 1
 M143 H1 S300 A0 C0                                          ; set temperature limit for heater 1 to 300C - fault if too high
 ;echo "sensor create time: " ^ state.upTime ^ "." ^ state.msUpTime
 
+;chamber
+M308 S2 P"exp.thermistor7" A"Chamber" Y"thermistor" T100000 B3950
 
 ; Set PID autotune parameters (will be overwritten by values in config-overide.g)
 M307 H0 R0.553 K0.263:0.000 D21.16 E1.00 S0.80 B0 ; Set PID for bed
 M307 H1 R2.816 K0.321:0.285 D10.12 E1.35 S1.00 B0 V24.3 ;set PID values for heater 1 (hotend)
 
 ; Joystick
-M308 S3 P"exp.thermistor4" Y"linear-analog" A"JoyStick-X" F1 B100 C-100 ; set analog input on E3 Temp with min/max of -100 to 100
-M308 S4 P"exp.thermistor6" Y"linear-analog" A"JoyStick-Y" F1 B100 C-100 ; set analog input on E5 Temp with min/max of -100 to 100
-M581 T7 P7 ; set up trigger for GpIn 7
-M950 J7 C"!^exp.31" 										; Input 7 uses Expansion 31 pin activate pullup and inverted
+;M308 S4 P"exp.thermistor4" Y"linear-analog" A"JoyStick-X" F1 B100 C-100 ; set analog input on E3 Temp with min/max of -100 to 100
+;M308 S5 P"exp.thermistor6" Y"linear-analog" A"JoyStick-Y" F1 B100 C-100 ; set analog input on E5 Temp with min/max of -100 to 100
+;M581 T7 P7 ; set up trigger for GpIn 7
+;M950 J7 C"!^exp.31" 										; Input 7 uses Expansion 31 pin activate pullup and inverted
 
 
 ; Servos and input/output
-M950 P5 C"exp.e5_stop" 										; Output 5 uses E5_STOP  pin
-M950 J6 C"exp.e6_stop" 										; Input 6 uses E6_STOP  pin
-
+;M950 P5 C"exp.e2_stop" 										; Output 5 uses E5_STOP  pin
+M950 P5 C"exp.e2stop" 
+;M950 J6 C"exp.e6_stop" 										; Input 6 uses E6_STOP  pin
+M950 J6 C"exp.e6stop"
 
 ; Filament monitor
 M591 P1 C"e0stop" S1 D0 									; filament monitor for extruder 0 connected to E0 endstop
@@ -131,19 +136,24 @@ M950 F0 C"fan0" Q50                                        ; create fan 0 on pin
 M106 P0 C"Part_Fan" S0 B2.0 H-1                             ; set fan 0 name and value. Thermostatic control is turned off
 
 ;water pump
-M950 F1 C"!fan1+^exp.pb6" Q25000                             ; create fan 1 (water pump) on inverted pin fan1 and set its frequency.  Set RPM to E3 stop with pullup enabled
+M950 F1 C"!fan1+^exp.e4stop" Q25000                             ; create fan 1 (water pump) on inverted pin fan1 and set its frequency.  Set RPM to pb6 with pullup enabled
 M106 P1 C"Water Pump" H1 L0.5 X1 B1.2  T50:60                       ; set fan 1 name and value. Thermostatic control is turned on.  Monitoring hoted sensor
 
 ; water temp monitor & fan
-M950 F2 C"!fan2+^exp.e3_stop" Q25000                                        ; create fan 2 on pin fan2 and set its frequency
-M308 S5 P"e1temp" Y"thermistor" A"Water temp" T10000 B3950  					; Configure Water temp sensor
-M106 P2 C"Radiator Fan" H5 L0 X1 B1.2  T33:38    	; set fan 4 value, turn on at 30% if the water temperature reaches 30C, and increase to full speed gradually as the temperature rises to 40C
+M950 F2 C"!fan2+^exp.e3stop" Q25000                                        ; create fan 2 on pin fan2 and set its frequency. Set RPM to e3_stop
+M308 S3 P"e1temp" Y"thermistor" A"Water temp" T10000 B3950  					; Configure Water temp sensor
+M106 P2 C"Radiator Fan" H3 L0.1 X1 B1.2  T35:38    	; set fan 4 value, turn on at 10% if the water temperature reaches 3C, and increase to full speed gradually as the temperature rises to 40C
 
 ; MCU temp sensor
-M308 S2 P"mcu-temp" Y"mcu-temp" A"Duet Board" 					; Configure MCU sensor
-M308 S6 Y"drivers" A"Duet stepper drivers"           ; defines sensor 6 as stepper driver temperature sensor
+M308 S6 P"mcu-temp" Y"mcu-temp" A"Duet Board" 					; Configure MCU sensor
+M308 S7 Y"drivers" A"Duet stepper drivers"           ; defines sensor 3 as stepper driver temperature sensor
 ; Calibrate MCU temp
 M912 P0 S-4	
+
+; Motor temp sensors
+M308 S4 P"exp.thermistor4" Y"thermistor" A"Motor-Temp-X" T100000 B3950 ; set thermistor for measuring motor body temp
+M308 S5 P"exp.thermistor6" Y"thermistor" A"Motor-Temp-Y" T100000 B3950 ; set thermistor for measuring motor body temp
+
 
 ; Tools
 M563 P0 S"Extruder1" D0 H1 F0                               ; define tool 0
@@ -220,42 +230,44 @@ M42 P5 S1
 ;Valve Control test to control servo position via fan speed
 ; Set up scaling variables {(output_end - output_start) / (input_end - input_start)}
 ;M950 S1 C"exp.heater4"  ; assign GPIO port 0 to heater4 on expansion connector, servo mode
-if !exists(global.InputStart) || global.InputStart=null
-	global InputStart=0
-else 
-	set global.InputStart=0
-G4 P10
-if !exists(global.InputEnd) || global.InputEnd=null
-	global InputEnd=1
-else
-	set global.InputEnd=1
-G4 P10
-if !exists(global.OutputStart) || global.OutputStart=null
-	global OutputStart=0
-else
-	set global.OutputStart=0
-G4 P10
-if !exists(global.OutputEnd) || global.OutputEnd=null
-	global OutputEnd=180
-else
-	set global.OutputEnd=180
-G4 P10
-if !exists(global.ScaleFactor) || global.ScaleFactor=null
-	global ScaleFactor=(global.OutputEnd - global.OutputStart) / (global.InputEnd - global.InputStart) ; no need for the math in this instance but it makes it clear how you arrive at the value.
-else
-	set global.ScaleFactor=(global.OutputEnd - global.OutputStart) / (global.InputEnd - global.InputStart)
-G4 P10
-if !exists(global.ServoOut) || global.ServoOut=null
-	global ServoOut=floor(global.ScaleFactor * (fans[0].actualValue - global.InputStart) + 0.5) + global.OutputStart ; calculate position required on sevo - use floor to apply rounding
-else
-	set global.ServoOut=floor(global.ScaleFactor * (fans[0].actualValue - global.InputStart) + 0.5) + global.OutputStart
+;if !exists(global.InputStart) || global.InputStart=null
+;	global InputStart=0
+;else 
+;	set global.InputStart=0
+;G4 P10
+;if !exists(global.InputEnd) || global.InputEnd=null
+;	global InputEnd=1
+;else
+;	set global.InputEnd=1
+;G4 P10
+;if !exists(global.OutputStart) || global.OutputStart=null
+;	global OutputStart=0
+;else
+;	set global.OutputStart=0
+;G4 P10
+;if !exists(global.OutputEnd) || global.OutputEnd=null
+;	global OutputEnd=180
+;else
+;	set global.OutputEnd=180
+;G4 P10
+;if !exists(global.ScaleFactor) || global.ScaleFactor=null
+;	global ScaleFactor=(global.OutputEnd - global.OutputStart) / (global.InputEnd - global.InputStart) ; no need for the math in this instance but it makes it clear how you arrive at the value.
+;else
+;	set global.ScaleFactor=(global.OutputEnd - global.OutputStart) / (global.InputEnd - global.InputStart)
+;G4 P10
+;if !exists(global.ServoOut) || global.ServoOut=null
+;	global ServoOut=floor(global.ScaleFactor * (fans[0].actualValue - global.InputStart) + 0.5) + global.OutputStart ; calculate position required on sevo - use floor to apply rounding
+;else
+;	set global.ServoOut=floor(global.ScaleFactor * (fans[0].actualValue - global.InputStart) + 0.5) + global.OutputStart
 ;M280 P1 S{global.servo_out} ; adjust valve position to reflect fan speed.
 
 ;play startup tune
 G4 S4					; Allow time for PanelDue to start & wifi connection etc
 set global.RunDaemon = false 
 M98 P"0:/macros/songs/itchyscratchy.g"								; Play tune
-set global.RunDaemon = true
+
+;re-enable once wiring sorted
+;set global.RunDaemon = true ; BEGIN HEATER CHECKS ETC
 
 ; configure accelerometer
 M955 P0 I06  R10 S2000 Q2000000 C"spi.cs3+spi.cs4" ; configure accelerometer

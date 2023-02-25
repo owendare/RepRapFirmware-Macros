@@ -4,7 +4,8 @@ echo "cancel.g called"
 set global.Cancelled = true
 
 if heat.heaters[1].current > heat.coldRetractTemperature
-	G10 ; retract the filament a bit before lifting the nozzle to release some of the pressure
+	if global.filamentIsFlexible = false
+		G10 ; retract the filament a bit before lifting the nozzle to release some of the pressure
 else
 	M291 P"Extruder temp too low to retract" R"Retracting" S0 T2
 
@@ -40,10 +41,12 @@ G90 ; absolute positioning
 if move.axes[0].homed && move.axes[1].homed && move.axes[2].homed
 	G1 X{move.axes[0].min} Y{move.axes[1].max} ; parks X head pushes bed out to front so you can pull part
 G4 S1 ; wait for moves to finish
-M84 ; steppers off
+;M84 ; steppers off
 M98 P"0:/sys/setDefaultProbePoints.g"
 M291 P"Print cancelled" R"Cancelled" S0 T2
 set global.RunDaemon = false ; the daemon interferes with the music
 M98 P"0:/macros/songs/itchyscratchy.g" ; play finish tune
 set global.RunDaemon = true 
 set global.Cancelled = false
+echo >>"0:/sys/print_log.txt" "Print job cancelled at", state.time
+echo >>"0:/sys/print_log.txt" "**********************************"

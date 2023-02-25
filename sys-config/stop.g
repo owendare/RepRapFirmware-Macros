@@ -7,9 +7,10 @@ set global.Cancelled = true
 if {state.currentTool!=-1} ; check if any tools are active
 	if #tools[state.currentTool].heaters > 0 & heat.heaters[tools[state.currentTool].heaters[0]].current > heat.coldRetractTemperature
 		G91 ; relative positioning
-		G1 E-1 F1800 ; retract the filament a bit before lifting the nozzle to release some of the pressure
-		M291 P"Retracted 1mm" R"Retracting" S0 T3
-		G4 S4 ; wait for popup
+		if global.filamentIsFlexible = false
+			G1 E-1 F1800 ; retract the filament a bit before lifting the nozzle to release some of the pressure
+			M291 P"Retracted 1mm" R"Retracting" S0 T3
+			G4 S4 ; wait for popup
 		G90 ; back to absolute positioning
 	else
 		M291 P{"Not retracted...  Heater off or below extrude temp  " ^ heat.heaters[1].current ^ " : " ^ heat.coldRetractTemperature ^ "."} R"Retract" S0 T5
@@ -63,12 +64,15 @@ G29 S2 ; clear bed height map (disables bed compensation)
 M98 P"0:/sys/setDefaultProbePoints.g"            ; re-define mesh grid in case it was altered
 
 
-
+set global.RunDaemon = false ; the daemon interferes with the music
 M98 P"0:/macros/songs/itchyscratchy.g" ; play finish tune
+set global.RunDaemon = true
 set global.Cancelled = false
 
 M291 P"Shut down complete - powering down" R"Finished" S0 T6
 M42 P5 S0 ; turn off LED strip driven by P5 output
 M81 S1 ; Wait for hotend to cool before turning off power
+echo >>"0:/sys/print_log.txt" "Print job finished at", state.time
+echo >>"0:/sys/print_log.txt" "**********************************"
 
 ;M929 S0 ; stop logging

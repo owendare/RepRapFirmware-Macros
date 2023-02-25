@@ -46,6 +46,7 @@ while true
 						M118 P0 S"heater over max temp fault detected in daemon.g.  - shutting down" L1
 						M112; emergency shutdown
 						M81 S1 ; turn off power when fans have turned off
+
 				if (heat.heaters[iterations].current > 45)  &&  (heat.heaters[iterations].active > 45); no real danger at below this temp as ambient may be close to this
 					;echo "heater " ^ iterations ^ " is above 45 degrees"
 					if (heat.heaters[iterations].state!="off") && (heat.heaters[iterations].current > heat.heaters[iterations].active + 15) ; temp is > 15 degrees above target.
@@ -77,8 +78,16 @@ while true
 				else
 					;echo "heater " ^ iterations ^ " is below 45 degrees so check thermistor" ;"heater is below 45 degrees so only other fault may be an open circuit thermistor which should show -275 degrees"
 					if heat.heaters[iterations].current < 0 ; we probably have a thermistor fault if heater is less than 0 degrees
+						echo "heater fault detected.  Thermistor may be shorted"
 						M112 ; emergency shutdown
 						M81 S1 ; turn off power when fans have turned off
+				
+				; check if we're trying to extrude at under cold extrude during a print
+				if state.currentTool > -1
+						if (state.status == "processing") && (heat.heaters[tools[state.currentTool].heaters[0]].current < heat.coldExtrudeTemperature)  && (move.currentMove.extrusionRate > 0)
+							echo "Print is in progress and trying to extrude under cold extrude temp.  Pausing print" 
+							M25
+						
 
 				;Check if water pump is running correctly
 				if (iterations=1) && ((heat.heaters[1].current) > (fans[1].thermostatic.lowTemperature+0))
@@ -86,8 +95,10 @@ while true
 						G4 S3 ; check again in 3 seconds in case it's just spinning up
 						if fans[1].rpm <= 500
 							echo "Water pump fault - shutting down heaters - RPM : " ^ fans[1].rpm
-							M25 ; pause print so you might be able to save it using M119
-							M0 ; unconditional stop.  If axes are homed and a print is being canceled will run cancel.g  otherwise will run stop.g
+							if (job.file.fileName != null) && (job.file.fileName !="")
+								M25 ; pause print so you might be able to save it using M119
+								M0 ; unconditional stop.  If axes are homed and a print is being canceled will run cancel.g  otherwise will run stop.g
+							M98 P"0:/macros/heating/all_heaters_off.g"
 							M81 S1 ; turn off power when fans have turned off
 					elif (fans[1].rpm > 500) && (fans[1].rpm < 1400)
 						G4 S3 ; check again in 3 seconds in case it's just spinning up
@@ -129,7 +140,23 @@ while true
 	if (state.deferredPowerDown==true) && (state.atxPower==true)
 		M291 S0 R"Powering down" P"A deferred power down is in progress.  Send M80 to cancel" T3
 		G4 S10
-	G4 S2 ; add a delay for these checks
-
-
-
+	; check if wifi is connected
+	if (network.interfaces[0].actualIP="0.0.0.0") || (network.interfaces[0].actualIP=null)
+		if exists(global.NetworkRestartTime)
+			if global.NetworkRestartTime > state.time
+				if fileexists("0:/sys/print_log.txt")
+					echo >>"0:/sys/print_log.txt" "WiFi disconnected:  Restart attempted at : " ^ state.time
+				M929 P"0:/sys/print_log.txt" S3
+				M122
+				M552 S-1 ; disable wifi
+				G4 S2
+				M552 S1 ; enable wifi
+				M929 S0; stop logging
+				set global.NetworkRestartTime = state.time + 60
+		else
+			global NetworkRestartTime = state.time + 60 ; set network restart time for 60 seconds from now
+			if fileexists("0:/sys/print_log.txt")
+				echo >>"0:/sys/print_log.txt" "WiFi disconnected:  WiFi module restart schedued for " ^ global.NetworkRestartTime
+	; add a delay for the checks in this section
+	G4 S2 ; add a delay for these checks		
+		

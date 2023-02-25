@@ -8,11 +8,16 @@ M400 ; wait for moves to finish
 M566 X200.00 Y200.00 Z10.00 E800.00                          ; set maximum instantaneous speed changes (mm/min)
 M203 X1200.00 Y1200.00 Z600.00 E6000.00                  ; set maximum speeds (mm/min)
 M201 X400.00 Y400.00 Z60.00 E120.00                        ; set accelerations (mm/s^2)
-
-;M913 X80 Y80 Z80 ; set X Y Z motors to 50% of their normal current
+M913 X80 Y80 Z80 ; set X Y Z motors to 80% of their normal current
 G91               ; relative positioning
+M564 S0 H0 ; allow movement before homing
 G1 H2 Z5 F120    ; lift Z relative to current position
-G1 H1 X-205 F1200 ; move quickly to X axis endstop and stop there (first pass)
+if sensors.endstops[0].triggered = true ; if we're hard against the endstop we need to move away
+	G1 H2 X20 F1200
+	M400
+	if sensors.endstops[0].triggered = true
+		abort "X Endstop appears to be faulty.  Still in triggered state."
+G1 H1 X-205 F1200 ; move quickly to X axis endstop and stop there (first pass)	
 if result != 0
 	abort "Error duing fast homing X axis - process cancelled"
 G1 H2 X5 F1200    ; go back a few mm

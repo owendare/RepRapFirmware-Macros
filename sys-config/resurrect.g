@@ -1,11 +1,9 @@
-; File "0:/gcodes/Shape-Box_0.2mm_ABS.gcode" resume print after print paused at 2021-12-06 14:21
+; File "0:/gcodes/pump-filter_0.2mm_PA-CF.gcode" resume print after print paused at 2023-02-11 08:39
 G21
-M140 P0 S105.0
-G29 S1
-T-1 P0
-G92 X88.773 Y80.122 Z16.660
+M140 P0 S85.0
+G92 X0.000 Y0.000 Z0.000
 G60 S1
-G10 P0 S270 R215
+G10 P0 S260 R225
 T0 P0
 M98 P"resurrect-prologue.g"
 M116
@@ -23,19 +21,20 @@ G10 L2 P7 X0.00 Y0.00 Z0.00
 G10 L2 P8 X0.00 Y0.00 Z0.00
 G10 L2 P9 X0.00 Y0.00 Z0.00
 G54
-M106 S0.30
-M106 P0 S0.30
+M106 S0.00
+M106 P0 S0.00
 M116
 G92 E0.00000
 M83
-M486 S0 A"Shape-Box id:0 copy 0"
+G94
+M486 S0 A""
 M486 S-1
 G17
-M23 "0:/gcodes/Shape-Box_0.2mm_ABS.gcode"
-M26 S89056
-G0 F6000 Z18.660
-G0 F6000 X88.773 Y80.122
-G0 F6000 Z16.660
-G1 F1350.0 P0
+M23 "0:/gcodes/pump-filter_0.2mm_PA-CF.gcode"
+M26 S14485
+G0 F6000 Z2.000
+G0 F6000 X0.000 Y0.000
+G0 F6000 Z0.000
+G1 F3000.0 P0
 G21
 M24

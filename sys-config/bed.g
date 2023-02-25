@@ -5,6 +5,9 @@
 ; uses conditional G Code for portability (requires Reprap Firmware version 3 or higher)
 ; Z Mesh probe area must be properly defined in M557 https://duet3d.dozuki.com/Wiki/Gcode#Section_M557_Set_Z_probe_point_or_define_probing_grid
 ; Note: The maximum amount of correction possible is defined in M671 (S parameter) https://duet3d.dozuki.com/Wiki/Gcode#Section_M671_Define_positions_of_Z_leadscrews_or_bed_levelling_screws
+
+var minDeviation = 0.018 ; Set the minimum acceptable devation
+
 M98 P"0:/sys/checkATX.g"
 M98 P"0:/sys/set_max_speeds.g" ; reset max speeds
 G29 S2 ; turn off bed mesh levelling
@@ -66,7 +69,7 @@ while true
   if result != 0
     abort "Print cancelled due to probe error"
   ;set maximum probe deviation allowed between the two points
-  if (abs(move.calibration.initial.deviation) <= 0.018)
+  if (abs(move.calibration.initial.deviation) <= var.minDeviation)
     break
   ; if deviation between the two points is too high, repeat the test after Z axis has been adjusted. 
   echo "Repeating calibration because deviation is too high " ^ move.calibration.initial.deviation ^ "mm"

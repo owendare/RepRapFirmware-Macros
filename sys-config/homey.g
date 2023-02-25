@@ -10,7 +10,13 @@ M566 X200.00 Y200.00 Z10.00 E800.00                          ; set maximum insta
 M203 X1200.00 Y1200.00 Z600.00 E6000.00                  ; set maximum speeds (mm/min)
 M201 X400.00 Y400.00 Z60.00 E120.00                        ; set accelerations (mm/s^2)
 G91               ; relative positioning
+M564 S0 H0 ; allow movement before homing
 G1 H2 Z5 F600    ; lift Z relative to current position
+if sensors.endstops[1].triggered = true ; if we're hard against the Y endstop we need to move away
+	G1 Y20 F1200
+	M400
+	if sensors.endstops[1].triggered = true
+		abort "X Endstop appears to be faulty.  Still in triggered state."	
 G1 H1 Y-205 F1200 ; move quickly to Y axis endstop and stop there (first pass)
 if result != 0
 	abort "Error duing fast homing Y axis- process cancelled"
