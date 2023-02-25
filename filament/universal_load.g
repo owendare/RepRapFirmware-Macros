@@ -32,7 +32,6 @@ else
 
 echo "pre heating"
 M98 P"0:/macros/heating/preheat_current_filament.g" F1 ; preheat to the temps set in filament config.g
-;M568 P{state.currentTool} R{heat.coldRetractTemperature+5} S{heat.coldExtrudeTemperature+10} A2
 if result !=0
 	echo "Error setting temp"
 M291 R{"Loading " ^ global.LoadedFilament} P"Waiting for nozzle loading temperature..." S0 T3

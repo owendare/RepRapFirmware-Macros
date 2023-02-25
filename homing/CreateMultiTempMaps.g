@@ -77,7 +77,7 @@ if result !=0
 	abort "Failed to create height map"
 G29 S3 P{var.HighTempMap}
 if result !=0
-	M140 S-276 ; turn off bed
+	M140 S-273 ; turn off bed
 	abort "Failed to create height map"
 
 M140 S-276 ; turn off bed

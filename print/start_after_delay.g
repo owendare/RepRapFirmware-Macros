@@ -26,6 +26,7 @@ var BeepFrequencyLow = 1000 ; frequency (low pitch) of beep play every var.Short
 var BeepFrequencyHigh = 3000 ;  frequency (high pitch) of beep play every var.ShortDelay when ten seconds left
 var BeepDuration = 200 ; duration of beep in milliseconds (must be less than one second) - note 1 second will cause constant beep for last 10 seconds
 
+
 ; ************** Don't change below this line *****************
 
 ; Create a global variable to allow the process to be cancelled.
@@ -48,10 +49,18 @@ if !exists(param.X)
 else
 	if (job.file.fileName!=null)
 		set var.FileName=job.file.fileName
-
+;sanity check beep
 if var.BeepDuration > 1000
 	echo "Invalid beep duration - reset to 1/2 second)
 	set var.BeepDuration = 1000
+	
+; sanity check default delay times
+if (var.ShortDelay < 5)
+	set var.ShortDelay = 5
+if (var.MediumDelay < var.ShortDelay) 
+	set var.MediumDelay = var.ShortDelay
+if (var.LongDelay < var.MediumDelay)
+	set var.LongDelay = var.MediumDelay
 
 if !exists(param.R)
 	if !exists(param.H)
@@ -66,6 +75,7 @@ var MinutesLeft = 0 ; variable for number of whole minutes from current time unt
 var SecondsLeft = 0 ; variable for number of whole seconds from current time until run time
 var StartTime = datetime(state.time) ; variable to hold time when macro first called
 var RunTime = datetime(state.time) ; variable to hold time when macro will end and print will run
+var timeLeft = 0
 
 if exists(param.R)
 	set var.StartTime = datetime(param.R)
@@ -89,6 +99,7 @@ echo "Print start time is " ^ var.RunTime
 while state.time < var.RunTime
 	if exists(global.Cancelled)
 		if global.Cancelled = true 
+			echo >>"0:/sys/print_log.g", "Delayed start print cancelled at" ^ state.Time
 			M291 P"Operation has been cancelled" S0 T3
 			G4 S3
 			abort "Deferred print cancelled."
@@ -112,12 +123,13 @@ while state.time < var.RunTime
 		G4 S{var.Delay}
 	elif (var.RunTime - state.time) > 10 
 		set var.Delay = 5
-		M291 R{var.FileName} T{var.Delay} S1 P{"Print starting in " ^ floor((var.RunTime - state.time)) ^ " seconds"}
+		set var.timeLeft = floor(var.RunTime - state.time)
+		M291 R{var.FileName} T{var.Delay} S1 P{"Print starting in " ^ floor(var.RunTime - state.time) ^ " seconds"}
 		M300 S{var.BeepFrequencyLow} P{var.BeepDuration}
 		G4 S{var.Delay}
 	else
 		set var.Delay = 1
-		M291 R{var.FileName} T{var.Delay} S0 P{"Print starting in " ^ floor((var.RunTime - state.time)) ^ " seconds"}
+		M291 R{var.FileName} T{var.Delay} S0 P{"Print starting in " ^ floor(var.RunTime - state.time) ^ " seconds"}
 		M300 S{var.BeepFrequencyHigh} P{var.BeepDuration}
 		G4 S{var.Delay}
 	if exists(param.X) && (var.Loops = param.X)

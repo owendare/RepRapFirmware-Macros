@@ -15,7 +15,8 @@ while iterations < #move.axes
 		break
 ;M593 P"none"     ; disable DAA
 ;echo "testing using " ^ {param.R}
-M593 P{param.R} F{param.F} ;apply input shaping based on paramteters passed.
+if exists(param.R) && exists(param.F)
+   M593 P{param.R} F{param.F} ;apply input shaping based on parameters passed.
 
 echo "Moving to start position"
 G1 X{var.StartX} Y{var.StartY} Z20 F3600

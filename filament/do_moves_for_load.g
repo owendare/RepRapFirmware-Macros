@@ -4,7 +4,7 @@
 ; S = the amount to extrude.
 ;echo "entering do_moves_for_load.g"
 var extrudeAmount = 50 ; default - how many mm of filament to extrude with each iteration.  
-var extrudeSpeed = 180 ; default - extrusion speed to use
+var extrudeSpeed = 120 ; default - extrusion speed to use
 
 if exists(param.S) ; check is a custom was passed
 	set var.extrudeAmount = param.S
@@ -25,7 +25,8 @@ echo "Waiting for temperature"
 M116 ; wait for any heating commands
 
 ; make sure we haven't dipped under the cold extrude temp while the temp is settling
-while {(heat.heaters[tools[state.currentTool].heaters[0]].current) < (heat.coldExtrudeTemperature)}
+var thisHeater = tools[state.currentTool].heaters[0]
+while {(heat.heaters[var.thisHeater].current) < (heat.coldExtrudeTemperature)}
 	echo "Temp is under cold extrude value.  Waiting to settle"
 	G4 S6
 	if iterations = 10
@@ -33,8 +34,8 @@ while {(heat.heaters[tools[state.currentTool].heaters[0]].current) < (heat.coldE
 		break
 
 	
-if  {(heat.heaters[tools[state.currentTool].heaters[0]].current) < (heat.coldExtrudeTemperature)}
-	M291 P{"Temp (" ^ heat.heaters[tools[state.currentTool].heaters[state.currentTool]].current ^ ") below cold extrude value"} R"Can't proceed" S0 T3
+if  {(heat.heaters[var.thisHeater].current) < (heat.coldExtrudeTemperature)}
+	M291 P{"Temp (" ^ heat.heaters[var.thisHeater].current ^ ") below cold extrude value"} R"Can't proceed" S0 T3
 	;M929 S0 ; stop logging
 	abort "Temp below cold extrude value - aborting";
 
@@ -43,11 +44,15 @@ while true
 	if iterations = 5
 		echo "Maximum number of feed attempts exceeded"
 		break
+	;if state.messageBox != null
+	;	M292 P0
 	M291 P{"Press OK to feed " ^ var.extrudeAmount ^ " of filament or CANCEL to abort"} R"Ready"  S3
-	while iterations  < var.extrudeAmount
+	var extruded = 0
+	while var.extruded  < var.extrudeAmount
 		G1 E1 F180
-		M291 P{"Please wait " ^ iterations + 1 ^ "mm of " ^ var.extrudeAmount ^ "mm fed"} R"Feeding filament"  S0
+		M291 P{"Please wait " ^ var.extruded + 1 ^ "mm of " ^ var.extrudeAmount ^ "mm fed"} R"Feeding filament"  S0
 		M400
+		set var.extruded = var.extruded + 1
 	G10 ; Retract to reduce pressure
 	M400 ; wait for moves to finish
 

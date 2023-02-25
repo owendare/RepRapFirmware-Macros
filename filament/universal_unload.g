@@ -28,23 +28,23 @@ var TargetTemp = heat.coldRetractTemperature + 5
 ;M291 R{"Unloading " ^ move.extruders[state.currentTool].filament} P"Waiting for nozzle unloading temperature..." S0 T3
 M568 P{state.currentTool} S{heat.coldExtrudeTemperature+10} R{var.TargetTemp} A1 ; Heat current tool just enough to cold pull
 G4 S3
-
+var thisHeater = tools[state.currentTool].heaters[0]
 ;show progress of heating from lower temp
-while (heat.heaters[tools[state.currentTool].heaters[state.currentTool]].current) < (var.TargetTemp - 1)
-	M291 R"Preheating..  Please wait" P{"Current temp = " ^  heat.heaters[tools[state.currentTool].heaters[state.currentTool]].current ^ " : target = " ^ var.TargetTemp}  S0 T2
+while (heat.heaters[tools[state.currentTool].heaters[0]].current) < (var.TargetTemp - 1)
+	M291 R"Preheating..  Please wait" P{"Current temp = " ^  heat.heaters[var.thisHeater].current ^ " : target = " ^ var.TargetTemp}  S0 T2
 	G4 S1.8
 	if global.Cancelled = true
 		M108
 		M98 P"0:/macros/heating/all_heaters_off.g"
 		abort "heating cancelled"
 
-if  (heat.heaters[tools[state.currentTool].heaters[state.currentTool]].current) > (var.TargetTemp + 1)
+if  (heat.heaters[var.thisHeater].current) > (var.TargetTemp + 1)
 	echo "Fan on to help cooling faster"
 	M106 S1
 
 ;show progress of cooling from hotter temp
-while  (heat.heaters[tools[state.currentTool].heaters[state.currentTool]].current) > (var.TargetTemp + 1)
-	M291 R"Preheating..  Please wait" P{"Current temp = " ^  heat.heaters[tools[state.currentTool].heaters[state.currentTool]].current ^ " : target = " ^ var.TargetTemp}  S0 T2
+while  (heat.heaters[var.thisHeater].current) > (var.TargetTemp + 1)
+	M291 R"Preheating..  Please wait" P{"Current temp = " ^  heat.heaters[var.thisHeater].current ^ " : target = " ^ var.TargetTemp}  S0 T2
 	G4 S1.8
 	if global.Cancelled = true
 		M108

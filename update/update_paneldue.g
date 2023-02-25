@@ -1,9 +1,6 @@
 ; update_paneldue.g  **** requires RRF firmware version 3.2rc4  or higher to work. ****
 
-
-M38 "0:/firmware/PanelDueFirmware.bin" ; check for existance of file.  A hash will be return if it exists
-
-if result == 0
+if fileexists("0:/firmware/PanelDueFirmware.bin")
 
 	M291 R"PanelDue Upgrade" P"New firmware has been detected. OK to update?" S3
 	M997 S4 ; update panel due firmware - file "PanelDueFirmware.bin" must exist in 0:/firmware/
@@ -27,5 +24,5 @@ if result == 0
 		G4 S5 ; wait 5 seconds before reboot
 		M999 ; software reboot
 
-elif result == 2
+else
 	M291 R"PanelDue Upgrade" P"PanelDueFirmware.bin not found in 0:/firmware/ directory.  Cannot perform update" S2 T6

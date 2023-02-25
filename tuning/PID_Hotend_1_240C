@@ -1,1 +1,1 @@
-M303 T0 P1 S240 ; tune heater 1 using 100% PWM, target temperature 240C
+M303 T0 P1 S240 F1 ; tune heater 1 using 100% PWM, target temperature 240C
