@@ -1,4 +1,4 @@
-;Calibrate BL Touch - (modified to use arrays.  requires 5.5b2 or later)
+;Calibrate BL Touch - (modified to use arrays.  requires RRF3.5b2 or later)
 ; If macro is called using parameters these will be used in testing
 ; parameters which can be passed are
 ; T - Tool to use
