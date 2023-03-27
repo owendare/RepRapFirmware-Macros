@@ -1,5 +1,4 @@
-;Calibrate BL Touch
-; Reprap firmware version 3.3b2 or later required!
+;Calibrate BL Touch - (modified to use arrays.  requires 5.5b2 or later)
 ; If macro is called using parameters these will be used in testing
 ; parameters which can be passed are
 ; T - Tool to use
@@ -20,6 +19,8 @@ var ProbePointY = (move.axes[1].min + move.axes[1].max)/2 ; modify to specify th
 var ThisTool=0 ; default tool to use
 
 ; Do not change below this line
+var probeResults = vector(var.NumTests,0)
+
 if exists(param.T)
 	set var.ThisTool=param.T
 
@@ -79,8 +80,6 @@ M558 F{var.probeSpeed} ; reduce probe speed for accuracy
 
 var RunningTotal=0
 var Average=0
-var Lowest=0
-var Highest=0
 
 
 if (var.nozzleTemp > 0) || (var.bedTemp > 0)
@@ -174,30 +173,14 @@ while iterations < var.NumTests
 	G30 S-1 ; do probe at current point
 	M118 P2 S{"Test # " ^ (iterations+1) ^ " Triggered @ " ^ sensors.probes[0].lastStopHeight ^ "mm"} ; send trigger height to Paneldue console
 	M118 P3 S{"Test # " ^ (iterations+1) ^ " Triggered @ " ^ sensors.probes[0].lastStopHeight ^ "mm"} ; send trigger height to DWC console
+	set var.probeResults[iterations] = sensors.probes[0].lastStopHeight
+	set var.RunningTotal={var.RunningTotal + var.probeResults[iterations]} ; set new running total
 
-	if iterations == 0
-		set var.Lowest={sensors.probes[0].lastStopHeight} ; set the new lowest reading to first probe height
-		set var.Highest={sensors.probes[0].lastStopHeight} ; set the new highest reading to first probe height
-
-	if sensors.probes[0].lastStopHeight < var.Lowest
-		set var.Lowest={sensors.probes[0].lastStopHeight} ; set the new lowest reading
-		;M118 P3 S{"new low reading = " ^ sensors.probes[0].lastStopHeight} ; send trigger height to DWC console
-		G4 S0.3
-	if sensors.probes[0].lastStopHeight > var.Highest
-		set var.Highest={sensors.probes[0].lastStopHeight} ; set the new highest reading
-
-		;M118 P3 S{"new high reading = " ^ sensors.probes[0].lastStopHeight} ; send trigger height to DWC console
-		G4 S0.3
-	set var.RunningTotal={var.RunningTotal + sensors.probes[0].lastStopHeight} ; set new running total
-	;M118 P3 S{"running total = " ^ var.RunningTotal} ; send running total to DWC console
-	G4 S0.5
-set var.Average = {(var.RunningTotal - var.Highest - var.Lowest) / (var.NumTests - 2)} 	; calculate the average after discarding the high & low reading
-
-;M118 P3 S{"running total = " ^ var.RunningTotal} ; send running total to DWC console
-;M118 P3 S{"low reading = " ^ var.Lowest} ; send low reading to DWC console
-;M118 P3 S{"high reading = " ^ var.Highest} ; send high reading to DWC console
+set var.Average = {(var.RunningTotal - max(var.probeResults) - min(var.probeResults)) / (var.NumTests - 2)} 	; calculate the average after discarding the high & low reading
 M118 P2 S{"Average excluding high and low reading = " ^ var.Average} ; send average to PanelDue console
 M118 P3 S{"Average excluding high and low reading = " ^ var.Average} ; send average to DWC console
+echo "High reading =", max(var.probeResults) , " : Low reading =", min(var.probeResults)
+echo "Trigger values: " , var.probeResults
 
 ;suggest new G31 values
 echo "suggested edit for G31 in config.g if not saved to config-overide.g"
