@@ -16,6 +16,7 @@ else
 var hours = 0
 var minutes = 0
 var startTime = state.time
+var timeCheck= state.time 
 var delayedStart = false
 M291 P"Start after delay?" R"Delay?" S4 K{"Yes","No"}
 if input = 0
@@ -29,10 +30,23 @@ if input = 0
 	; end of code to use hours and minutes from now.
 
 	; start of code to use Specific date and time to start.
-	M291 S7 P{"Enter start date time. Format = " ^ var.startTime} L19 H19 F{var.startTime + 3600}
-	M118 P0 L1 S{"Start time selected is " ^ input}
+	set var.startTime=state.time
+	M291 S4 P"Choose method to set time" R"Select method" K{"Add hours/minutes from now","Specify time",} F0
+	if input = 1
+		M291 S7 P{"Enter start date time (Default 1 hour from now). Format = " ^ var.startTime} L19 H19 F{var.startTime + 3600}
+		set var.timeCheck = datetime(input) ; if the format is wrong this will cause an error which cancels the macro & print
+		M118 P0 L1 S{"Start time selected is " ^ input}
+	else
+		var hoursFromNow = 0
+		var minsFromNow = 0
+		M291 S5 P"Enter hours from now to start (0-24)" L0 H24 F0
+		set var.hoursFromNow = input
+		M291 S5 P"Enter minutes to add till start (0-59)" R{"Hours to start = " ^ var.hoursFromNow} L0 H59 F0 
+		set var.minsFromNow = input
+		set var.timeCheck = datetime(var.startTime + (var.hoursFromNow*3600) + (var.minsFromNow*60))
+		M118 P0 L1 S{"Start time selected is " ^ var.timeCheck}
 	G4 P100
-	var timeCheck = datetime(input) ; if the format is wrong this will cause an error which cancels the macro & print
+	
 	if var.timeCheck <= state.time
 		M118 P0 L1 S{"ERROR: Start time entered is before current time.  Print cancelled"}
 		G4 S2
