@@ -99,7 +99,7 @@ echo "Print start time is " ^ var.RunTime
 while state.time < var.RunTime
 	if exists(global.Cancelled)
 		if global.Cancelled = true 
-			echo >>"0:/sys/print_log.g", "Delayed start print cancelled at" ^ state.Time
+			echo >>"0:/sys/print_log.txt" "Delayed start print cancelled at " ^ state.time
 			M291 P"Operation has been cancelled" S0 T3
 			G4 S3
 			abort "Deferred print cancelled."
