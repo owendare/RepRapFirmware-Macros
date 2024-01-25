@@ -1,0 +1,13 @@
+2022-06-12 08:18:32 [info] Event logging started at level debug
+2022-06-12 08:18:32 [info] Running: Duet WiFi 1.02 or later: 3.4.1 (2022-06-01 21:05:28)
+2022-06-12 08:18:32 [debug] Motor current % of normal - X:100, Y:100, Z:100, E:100
+2022-06-12 08:18:32 [debug] Motor current % of normal - X:100, Y:100, Z:100, E:100
+2022-06-12 08:18:32 [debug] Motor current % of normal - X:100, Y:100, Z:100, E:100
+2022-06-12 08:18:32 [debug] Motor current % of normal - X:100, Y:100, Z:100, E:100
+2022-06-12 08:18:32 [debug] Motor current % of normal - X:100, Y:100, Z:100, E:100
+2022-06-12 08:18:32 [debug] Motor current % of normal - X:100, Y:100, Z:100, E:100
+2022-06-12 08:18:32 [debug] Motor current % of normal - X:100, Y:100, Z:100, E:100
+2022-06-12 08:18:32 [debug] Motor current % of normal - X:100, Y:100, Z:100, E:100
+2022-06-12 08:18:32 [debug] Motor current % of normal - X:100, Y:100, Z:100, E:100
+2022-06-12 08:18:32 [debug] Motor current % of normal - X:100, Y:100, Z:100, E:100
+2022-06-12 08:18:32 [info] Event logging stopped

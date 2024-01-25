@@ -1,0 +1,15 @@
+2023-03-06 20:18:54 [info] Event logging started at level warn
+2023-03-06 20:18:54 [info] Running: Duet WiFi 1.02 or later: 3.5beta2+ (2023-02-12 12:52:31)
+2023-03-06 20:19:22 [info] Event logging stopped
+2023-03-06 20:19:22 [info] Event logging started at level info
+2023-03-06 20:19:22 [info] Running: Duet WiFi 1.02 or later: 3.5beta2+ (2023-02-12 12:52:31)
+2023-03-06 20:19:32 [info] M291: - Tool - Please load Tool #0
+2023-03-06 20:19:35 [info] M292: cancelled=false
+2023-03-06 20:19:44 [warn] Error: M291: missing parameter 'P'
+2023-03-06 20:20:31 [info] M291: - [no title] - 0:/sys/log.txt
+2023-03-06 20:20:52 [info] Event logging stopped
+2023-03-06 20:22:37 [info] Event logging started at level info
+2023-03-06 20:22:37 [info] Running: Duet WiFi 1.02 or later: 3.5beta2+ (2023-02-12 12:52:31)
+2023-03-06 20:22:46 [info] M291: - Tool - Please load Tool #0
+2023-03-06 20:22:48 [info] M292: cancelled=false
+2023-03-06 20:23:18 [info] Event logging stopped

@@ -1,0 +1,5 @@
+Print started at 2024-01-21T06:55:48
+0:/gcodes/Valve body_0.2mm_PCABS.gcode
+***************
+Print job finished at 2024-01-21T12:31:42
+**********************************

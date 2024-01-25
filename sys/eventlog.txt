@@ -1,0 +1,5 @@
+2023-03-06 20:16:27 [info] Event logging started at level info
+2023-03-06 20:16:27 [info] Running: Duet WiFi 1.02 or later: 3.5beta2+ (2023-02-12 12:52:31)
+2023-03-06 20:16:55 [info] M291: - Tool - Please load Tool #0
+2023-03-06 20:16:58 [info] M292: cancelled=false
+2023-03-06 20:17:09 [info] Event logging stopped
