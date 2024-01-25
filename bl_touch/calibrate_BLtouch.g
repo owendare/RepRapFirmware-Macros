@@ -19,7 +19,6 @@ var ProbePointY = (move.axes[1].min + move.axes[1].max)/2 ; modify to specify th
 var ThisTool=0 ; default tool to use
 
 ; Do not change below this line
-var probeResults = vector(var.NumTests,0)
 
 if exists(param.T)
 	set var.ThisTool=param.T
@@ -53,6 +52,8 @@ if exists(param.I)
 		abort "I parameter must be > 2 - Test aborted"
 	else
 		set var.NumTests = param.I
+
+var probeResults = vector(var.NumTests,0)
 
 if exists(param.F)
 	set var.travelSpeed = param.F * 60
@@ -94,13 +95,13 @@ if (var.nozzleTemp > 0) || (var.bedTemp > 0)
 	if (var.bedTemp > 0)
 		M140 H0 S{var.bedTemp}
 
-if state.gpOut[0].pwm=0.03 ; check if probe is already deployed
-	echo "Probe ia already deployed - retracting"
+if state.gpOut[0].pwm<0.035 ; check if probe is already deployed
+	echo "Probe is already deployed - retracting"
 	M280 P0 S80 ; retract BLTouch
 	G4 S0.5
 
 if sensors.endstops[2].triggered ; check if probe is already triggered
-	echo "Probe ia already triggered - resetting"
+	echo "Probe is already triggered - resetting"
 	M280 P0 S160 ; reset BL Touch
 	G4 S0.5
 
@@ -121,7 +122,7 @@ if !move.axes[0].homed || !move.axes[1].homed || !move.axes[2].homed
 	G28
 	M400
 else
-	G1 Z{sensors.probes[0].diveHeight} F{var.ZtravelSpeed} ; if axes homed move to dive height
+	G1 Z{sensors.probes[0].diveHeights[0]} F{var.ZtravelSpeed} ; if axes homed move to dive height
 M400
 M291 P{"Press OK to move to probe point X" ^ floor(var.ProbePointX) ^ " Y" ^ floor(var.ProbePointY)} R"Ready?" S3;
 ; move nozzle to defined probe point
@@ -134,8 +135,8 @@ if (var.nozzleTemp > 0) || (var.bedTemp > 0)
 M564 S0 H0 ; Allow movement beyond limits
 
 ;ensure you have room for the probe
-if sensors.probes[0].lastStopHeight < sensors.probes[0].diveHeight
-	G1 Z{sensors.probes[0].diveHeight} F{var.ZtravelSpeed}
+if sensors.probes[0].lastStopHeight < sensors.probes[0].diveHeights[0]
+	G1 Z{sensors.probes[0].diveHeights[0]} F{var.ZtravelSpeed}
 	
 
 ; Notify user to jog nozzle to start position
@@ -145,7 +146,7 @@ G92 Z0 ; set Z position to zero
 M291 P"Press OK to begin probing" R"Ready?" S3;
 
 ; Move probe over top of same point that nozzle was when zero was set
-G1 Z{sensors.probes[0].diveHeight} F{var.ZtravelSpeed}; lift head
+G1 Z{sensors.probes[0].diveHeights[0]} F{var.ZtravelSpeed}; lift head
 G1 X{move.axes[0].machinePosition - sensors.probes[0].offsets[0]} Y{move.axes[1].machinePosition - sensors.probes[0].offsets[1]} F{var.travelSpeed}
 
 echo "Current probe offset = " ^ sensors.probes[0].triggerHeight ^ "mm"
@@ -153,9 +154,9 @@ echo "Current probe offset = " ^ sensors.probes[0].triggerHeight ^ "mm"
 ; carry out 10 probes (or what is set in NumTests variable)
 
 while iterations < var.NumTests
-	G1 Z{sensors.probes[0].diveHeight} F{var.ZtravelSpeed}; move to dive height
+	G1 Z{sensors.probes[0].diveHeights[0]} F{var.ZtravelSpeed}; move to dive height
 		
-	if state.gpOut[0].pwm=0.03
+	if state.gpOut[0].pwm<0.035
 		echo "Probe ia already deployed - retracting"
 		M280 P0 S80 ; retract BLTouch
 		G4 S0.5
@@ -169,7 +170,6 @@ while iterations < var.NumTests
 		G4 S0.5
 		M280 P0 S80 ; retract BLTouch
 		G4 S0.5
-
 	G30 S-1 ; do probe at current point
 	M118 P2 S{"Test # " ^ (iterations+1) ^ " Triggered @ " ^ sensors.probes[0].lastStopHeight ^ "mm"} ; send trigger height to Paneldue console
 	M118 P3 S{"Test # " ^ (iterations+1) ^ " Triggered @ " ^ sensors.probes[0].lastStopHeight ^ "mm"} ; send trigger height to DWC console
@@ -189,7 +189,7 @@ echo "change G31 Z parameter from Z" ^ sensors.probes[0].triggerHeight ^ " to Z"
 G31 P500 Z{var.Average} ; set Z probe offset to the average reading
 M564 S1 H1 ; Reset limits
 M558 F{var.ProbeSpeedHigh}:{var.ProbeSpeedLow} ; reset probe speed to original
-G1 Z{sensors.probes[0].diveHeight} F{var.ZtravelSpeed} ; move head back to dive height
+G1 Z{sensors.probes[0].diveHeights[0]} F{var.ZtravelSpeed} ; move head back to dive height
 
 if var.bedTemp > 0
 	M140 R0 S0 ; set bed to zero
