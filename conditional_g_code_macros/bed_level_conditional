@@ -1,0 +1,25 @@
+; Auto calibration routine for large delta printer
+M561                    ; clear any bed transform
+; If the printer hasn't been homed, home it
+if !move.axes[0].homed || !move.axes[1].homed || !move.axes[2].homed
+  G28
+; Probe the bed and do auto calibration
+G1 X0 Y100 Z10 F10000        ; go to just above the first probe point
+while true
+  if iterations = 5
+    abort "Too many auto calibration attempts"
+  G30 P0 X0.00 Y90.00 Z-99999
+  echo move.calibration.initial.deviation
+  if result != 0
+    continue
+  G30 P1 X155.00 Y90 Z-99999 S2
+  echo move.calibration.initial.deviation
+  if result != 0
+    continue
+  if (move.calibration.initial.deviation <= 0.02)
+    break
+  echo "Repeating calibration because deviation is too high " ^ move.calibration.initial.deviation ^ "mm"
+; end loop
+echo "Auto calibration successful, deviation"
+echo move.calibration.initial.deviation ^ "mm"
+G1 X0 Y180 Z20 F10000                ; get the head out of the way

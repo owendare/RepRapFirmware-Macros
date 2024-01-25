@@ -1,0 +1,4 @@
+M291 S7 R"S7" P"Solicitar un valor de cadena. L es el número mínimo de caracteres (predeterminado 1), H es el número máximo de caracteres (L2 H50)" L2 H50 F"Nombre"
+M400
+M291 S2 R"Respuesta input" P{input}
+M400

@@ -1,0 +1,1 @@
+echo "X param= " ^ param.F

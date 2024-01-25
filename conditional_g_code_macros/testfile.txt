@@ -1,0 +1,14 @@
+ADDED LINE in 0.0700000 seconds
+2022-06-12 08:16:16 [info] Event logging started at level debug
+2022-06-12 08:16:16 [info] Running: Duet WiFi 1.02 or later: 3.4.1 (2022-06-01 21:05:28)
+2022-06-12 08:16:16 [debug] Z probe 0: current reading 0, threshold 500, trigger height 1.590, offsets X26.2 Y-1.0
+2022-06-12 08:16:16 [debug] Z probe 0: current reading 0, threshold 500, trigger height 1.590, offsets X26.2 Y-1.0
+2022-06-12 08:16:16 [debug] Z probe 0: current reading 0, threshold 500, trigger height 1.590, offsets X26.2 Y-1.0
+2022-06-12 08:16:16 [debug] Z probe 0: current reading 0, threshold 500, trigger height 1.590, offsets X26.2 Y-1.0
+2022-06-12 08:16:16 [debug] Z probe 0: current reading 0, threshold 500, trigger height 1.590, offsets X26.2 Y-1.0
+2022-06-12 08:16:16 [debug] Z probe 0: current reading 0, threshold 500, trigger height 1.590, offsets X26.2 Y-1.0
+2022-06-12 08:16:16 [debug] Z probe 0: current reading 0, threshold 500, trigger height 1.590, offsets X26.2 Y-1.0
+2022-06-12 08:16:16 [debug] Z probe 0: current reading 0, threshold 500, trigger height 1.590, offsets X26.2 Y-1.0
+2022-06-12 08:16:16 [debug] Z probe 0: current reading 0, threshold 500, trigger height 1.590, offsets X26.2 Y-1.0
+2022-06-12 08:16:16 [debug] Z probe 0: current reading 0, threshold 500, trigger height 1.590, offsets X26.2 Y-1.0
+2022-06-12 08:16:16 [info] Event logging stopped

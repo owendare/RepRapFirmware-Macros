@@ -1,4 +1,5 @@
 ;loney-tunes-theme
+set global.RunDaemon = false ; the daemon interferes with the music
 M300 P188 S659
 G4 P188
 M300 P94 S262
@@ -325,3 +326,4 @@ M300 P98 S0
 G4 P98
 M300 P113 S523
 G4 P113
+set global.RunDaemon = true ; the daemon interferes with the music

@@ -58,6 +58,7 @@ if !exists(param.F)
 		if global.Cancelled = true
 			M98 P"0:/macros/heating/all_heaters_off.g"
 			abort "heating cancelled"
+	M98 P"0:/macros/heating/soak_bed.g" ; wait for soak time
 echo "waiting for pre-heat temps"
 M116 ; wait for temps to settle
 M291 R"Preheating" P"Preheating... Done" S0 T2

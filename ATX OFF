@@ -1,0 +1,19 @@
+if (state.status="processing")
+	echo "Printer must be idle before turning off ATX"
+	M99
+if (state.atxPower=false)
+	M99 ; nothing to do here
+var toolTemp = 0
+while iterations < #tools
+	if heat.heaters[tools[iterations].heaters[0]].current > var.toolTemp
+		set var.toolTemp = heat.heaters[tools[iterations].heaters[0]].current
+if var.toolTemp > 50
+	M291 S4 R"Confirm" P"A heater is over 50 degrees." K{"Shutdown Now","Defer shutdown till fans off",} F1
+	if input = 0
+		M81
+	else
+		M98 P"0:/macros/heating/all_heaters_off.g"
+		M81 S1
+else
+	M81
+echo "ATX power off"

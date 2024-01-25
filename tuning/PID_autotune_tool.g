@@ -3,6 +3,10 @@
 ; Used to PID auto tune selected tools and associated tools
 ; if more than 1 tooland/or heater is defined, a choice is presented
 
+
+if state.status == "off"
+	M80 
+	G4 S1
 ; if we're not homed, offer to home axes
 if move.axes[0].homed != true || move.axes[1].homed != true || move.axes[2].homed != true
 	M291 R"Home" P"Home axes?" S4 K{"Yes","No"} F1
@@ -78,11 +82,24 @@ else
 		abort "PID Tuning error"
 
 while heat.heaters[1].state = "tuning"
-	;if state.messageBox = null
-	M291 R"Tuning" P"Tuning in progress. Send ""M303 H-1"" to cancel" S1 T2
-	G4 S4
+	if state.messageBox = null
+		M291 R"Tuning" P"Tuning in progress" S4 K{"OK","Cancel tuning"}
+		if {input = 1}
+			M303 H-1; cancel tuning- Estop is only way at present.  M303 H-1 should work in future
+			echo "Result = ", result
+			if result!= 0
+				M291 R"Canceling" P"Cancellation of tuning failed.  Manual intervention may be required" S4 K{"OK", "E-Stop now!",}
+					if {input = 1}
+						;M112 ; emergency stop
+						M999 ; restart
+						G4 P100
+			M291 R"Cancelled" P"PID Autotune Cancelled" S1 T2
+			M99 ; cancel macro
+		G4 S5 ; delay to allow message box to be closed while othe operations are carried out
+			
 ;if state.messageBox != null
 ;	M292 P0
+;G4 P100
 M291 R"Finished tuning" P"OK to save results to config-override.g, cancel to discard" S3
 M500
 if fileexists(directories.system ^ "config-override.g")

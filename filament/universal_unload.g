@@ -2,18 +2,21 @@
 ;;
 ;M929 P"0:/macros/filament/unloadeventlog.txt" S3
 echo "entering 0:/macros/filament/universal_unload.g"
-M106 S0  ; fan off
+;M106 S0  ; fan off
 ;move to a good height and centre of bed
 while iterations < #move.axes
 	if !move.axes[iterations].homed
-		echo "Homing"
-		G28 
-M400
-
-if (move.axes[0].userPosition!=global.Bed_Center_X) || (move.axes[1].userPosition!=global.Bed_Center_Y) || (move.axes[2].userPosition!=75)
-	M291 R"Positioning" P"Moving to safe extrude height" S1 T2
-	G1 X{global.Bed_Center_X} Y{global.Bed_Center_Y} Z75 F3600
-M400
+		M291 S4 K{"Yes","No",} F0 R"Axes unhomed" P"Home all axes?"
+		if input = 0
+			G28 
+			M400
+; if we're not in a print then move to a safe place to extrude
+if move.axes[0].homed &&  move.axes[1].homed && move.axes[2].homed  && job.file.fileName = null
+	if (move.axes[0].userPosition!=global.Bed_Center_X) || (move.axes[1].userPosition!=global.Bed_Center_Y) || (move.axes[2].userPosition!=75)
+		M291 R"Positioning" P"Move to safe extrude height?" S4 K{"Yes","No",} F0
+		if input =0
+			G1 X{global.Bed_Center_X} Y{global.Bed_Center_Y} Z75 F3600
+			M400
 
 if state.currentTool==-1
 	M291 R"No Tool" P"No tool selected.  OK to unload tool 0, Cancel to abort" S2

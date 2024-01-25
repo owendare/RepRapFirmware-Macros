@@ -1,0 +1,1 @@
+M586 P2 S0 ; disable telnet

@@ -1,4 +1,5 @@
 ;Simpsons
+set global.RunDaemon = false ; the daemon interferes with the music
 M300 S2093 P500
 G4 P100
 M300 S2637 P500
@@ -43,3 +44,4 @@ M300 S2093 P187
 G4 P100
 M300 S2093 P195
 G4 P500
+set global.RunDaemon = true ; the daemon interferes with the music

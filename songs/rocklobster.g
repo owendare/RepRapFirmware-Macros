@@ -1,4 +1,5 @@
 ;RockLobs
+set global.RunDaemon = false ; the daemon interferes with the music
 M300 S0 P41
 G4 P40
 M300 S1567 P166
@@ -47,3 +48,4 @@ M300 S1567 P666
 G4 P666
 M300 S0 P166
 G4 P166
+set global.RunDaemon = true ; the daemon interferes with the music

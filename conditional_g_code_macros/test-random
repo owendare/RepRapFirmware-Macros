@@ -1,0 +1,3 @@
+while iterations < 9
+	echo random(20)
+	G4 S2

@@ -1,0 +1,3 @@
+; turn on LED strip driven by P5 output
+var ReverseState = floor(abs(state.gpOut[5].pwm-1)) ; set the state to zero or one.  Opposite of current state
+M42 P5 S{var.ReverseState}

@@ -1,0 +1,1 @@
+M586 P2 S1 ; enable telnet

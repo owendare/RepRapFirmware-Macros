@@ -1,0 +1,10 @@
+; recordMacro.g
+if move.axes[0].homed!=true ||  move.axes[1].homed!=true ||  move.axes[2].homed!=true
+	G28
+
+M291 R"Ready" P"Ready to begin?" S3
+echo >"0:/gcodes/myMacro.g" ";created at",state.time
+while true
+	M291 R"Move" P"Jog to next position" X1 Y1 Z1 S3
+	M291 R"Speed" P"Enter speed to be used to get to this point (min=100 : max=12000)" S5 L100 H12000
+	echo >>"0:/gcodes/myMacro.g" "G1 X"^{move.axes[0].machinePosition}, "Y"^{move.axes[1].machinePosition}, "Z"^{move.axes[2].machinePosition}, "F"^{input}

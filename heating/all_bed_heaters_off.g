@@ -6,4 +6,5 @@ while iterations < #heat.bedHeaters
 		M140 P{iterations} S-276
 		M291 P{"Bed heater # " ^ iterations ^ " off"} R"Heaters" S0 T1
 		G4 S1.1 ; wait for popup
+set global.BedHasSoaked = false
 echo "All bed heaters turned off"

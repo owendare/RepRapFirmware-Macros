@@ -1,0 +1,1 @@
+echo param.A, param.B, param.C

@@ -1,0 +1,7 @@
+var number = 0
+var days_100 = 0
+	while true
+		set var.number = var.number + (60 * 60)
+		if mod(var.number,100) = 0
+			set var.days_100 = var.days_100 + 1
+			echo "Hours = " ^ var.days_100 
